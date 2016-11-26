@@ -1,15 +1,14 @@
-from flask import Flask, render_template, request
+from flask import Flask, abort, jsonify, url_for, render_template, g, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_httpauth import HTTPBasicAuth
 from passlib.apps import custom_app_context as pwd_context
+from itsdangerous import (TimedJSONWebSignatureSerializer as Serializer, BadSignature, SignatureExpired)
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://ruvadmin:ge9BQ7fT8bVBgm1B@localhost/ruvapp'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 db = SQLAlchemy(app)
-
-auth = HTTPBasicAuth
-
+auth = HTTPBasicAuth()
 
 
 class User(db.Model):
@@ -18,22 +17,27 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True)
     password_hash = db.Column(db.String(128))
 
-    def __init__(self, email, password_hash):
-        self.email = email
-        self.password_hash = password_hash
-
-    def __repr__(self):
-        return '<E-mail %r>' % self.email
-
     def hash_password(self, password):
         self.password_hash = pwd_context.encrypt(password)
 
     def verify_password(self, password):
         return pwd_context.verify(password, self.password_hash)
 
-    def return_password_hash(self, password_hash):
-        return password_hash
+    def generate_auth_token(self, expiration=600):
+        s = Serializer(app.config['SECRET_KEY'], expires_in=expiration)
+        return s.dumps({'id': self.id})
 
+    @staticmethod
+    def verify_auth_token(token):
+        s = Serializer(app.config['SECRET_KEY'])
+        try:
+            data = s.loads(token)
+        except SignatureExpired:
+            return None  # valid token, but expired
+        except BadSignature:
+            return None  # invalid token
+        user = User.query.get(data['id'])
+        return user
 
 
 class Roof(db.Model):
@@ -45,25 +49,61 @@ class Roof(db.Model):
     price = db.Column(db.DECIMAL(10, 2))
 
 
+@auth.verify_password
+def verify_password(email_or_token, password):
+    # first try to authenticate by token
+    user = User.verify_auth_token(email_or_token)
+    if not user:
+        # try to authenticate with username/password
+        user = User.query.filter_by(email=email_or_token).first()
+        if not user or not user.verify_password(password):
+            return False
+    g.user = user
+    return True
+
+
 @app.route('/')
 def index():
     return render_template('index.html')
 
 
 @app.route('/login', methods=['POST'])
-def login():
-    email = None
-    if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
-        print password
-        # Check that email does not already exist (not a great query, but works)
-        if not db.session.query(User).filter(User.email == email).count():
-            reg = User(email, password)
-            db.session.add(reg)
-            db.session.commit()
-            return render_template('success.html')
+
+def new_user():
+    email = request.json.get('email')
+    password = request.json.get('password')
+    if email is None or password is None:
+        abort(400)
+    if User.query.filter_by(email=email).first() is not None:
+        abort(400)
+    user = User(email=email)
+    User.hash_password(password)
+    db.session.add(user)
+    db.session.commit()
+    # return (jsonify({'email': user.email}), 201,
+    #         {'Location': url_for('get_user', id=user.id, _external=True)})
     return render_template('index.html')
+
+
+
+@app.route('/users/<int:id>')
+def get_user(id):
+    user = User.query.get(id)
+    if not user:
+        abort(400)
+    return jsonify({'username': user.username})
+
+@app.route('/token')
+@auth.login_required
+def get_auth_token():
+    token = g.user.generate_auth_token(600)
+    return jsonify({'token': token.decode('ascii'), 'duration': 600})
+
+
+@app.route('/resource')
+@auth.login_required
+def get_resource():
+    return jsonify({'data': 'Hello, %s!' % g.user.email})
 
 if __name__ == '__main__':
     app.debug = True
