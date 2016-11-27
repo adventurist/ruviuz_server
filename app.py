@@ -96,17 +96,32 @@ def login():
         db.session.add(user)
         db.session.commit()
         return render_template('success.html')
-    # elif request.headers == 'application/json':
-    #     email = request.json.get('email')
-    #     password = request.json.get('password')
-    #     if email is None or password is None:
-    #         abort(400)
-    #     if User.query.filter_by(email=email).first() is not None:
-    #         # passCheck =
+    elif request.headers['Content-Type'] == 'application/json':
+        print(request.json)
+        email = request.json.get('email')
+        password = request.json.get('password')
+        if email is None or password is None:
+            abort(400)
+        if User.query.filter_by(email=email).first() is not None:
+            verify = verify_password(email, password)
+            user = User(email=email)
+            print(verify)
+            if verify:
+                print('You already in there\n')
+                return render_template('success.html')
+            else:
+                print 'Login failed'
+                return 'Login failed'
 
+        user = User(email=email)
+        User.hash_password(user, password)
+        db.session.add(user)
+        db.session.commit()
+        return jsonify({'email': user.email}), 201, {'Location': url_for('get_user', id=user.id, _external=True)}
 
 
 @app.route('/users/<int:id>')
+@auth.login_required
 def get_user(id):
     user = User.query.get(id)
     if not user:
