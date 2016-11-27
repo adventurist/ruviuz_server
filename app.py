@@ -5,6 +5,7 @@ from passlib.apps import custom_app_context as pwd_context
 from itsdangerous import (TimedJSONWebSignatureSerializer as Serializer, BadSignature, SignatureExpired)
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'geunyeorang cheoeum daehoa sijag hajamaja'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://ruvadmin:ge9BQ7fT8bVBgm1B@localhost/ruvapp'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 db = SQLAlchemy(app)
@@ -19,6 +20,7 @@ class User(db.Model):
 
     def hash_password(self, password):
         self.password_hash = pwd_context.encrypt(password)
+        print(self.password_hash)
 
     def verify_password(self, password):
         return pwd_context.verify(password, self.password_hash)
@@ -37,6 +39,8 @@ class User(db.Model):
         except BadSignature:
             return None  # invalid token
         user = User.query.get(data['id'])
+        if user is None:
+            return
         return user
 
 
@@ -56,6 +60,7 @@ def verify_password(email_or_token, password):
     if not user:
         # try to authenticate with username/password
         user = User.query.filter_by(email=email_or_token).first()
+        print user
         if not user or not user.verify_password(password):
             return False
     g.user = user
@@ -69,20 +74,35 @@ def index():
 
 @app.route('/login', methods=['POST'])
 
-def new_user():
-    email = request.json.get('email')
-    password = request.json.get('password')
-    if email is None or password is None:
-        abort(400)
-    if User.query.filter_by(email=email).first() is not None:
-        abort(400)
-    user = User(email=email)
-    User.hash_password(password)
-    db.session.add(user)
-    db.session.commit()
-    # return (jsonify({'email': user.email}), 201,
-    #         {'Location': url_for('get_user', id=user.id, _external=True)})
-    return render_template('index.html')
+def login():
+    if request.headers['content-Type'] == 'application/x-www-form-urlencoded':
+        email = request.form['email']
+        password = request.form['password']
+        if email is None or password is None:
+            abort(400)
+        if User.query.filter_by(email=email).first() is not None:
+            verify = verify_password(email, password)
+            user = User(email=email)
+            print(verify)
+            if verify:
+                print('You already in there\n')
+                return render_template('success.html')
+            else:
+                print 'Login failed'
+                return 'Login failed'
+
+        user = User(email=email)
+        User.hash_password(user, password)
+        db.session.add(user)
+        db.session.commit()
+        return render_template('success.html')
+    # elif request.headers == 'application/json':
+    #     email = request.json.get('email')
+    #     password = request.json.get('password')
+    #     if email is None or password is None:
+    #         abort(400)
+    #     if User.query.filter_by(email=email).first() is not None:
+    #         # passCheck =
 
 
 
@@ -91,7 +111,7 @@ def get_user(id):
     user = User.query.get(id)
     if not user:
         abort(400)
-    return jsonify({'username': user.username})
+    return jsonify({'email': user.email, 'password': user.password_hash})
 
 @app.route('/token')
 @auth.login_required
