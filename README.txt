@@ -1,6 +1,6 @@
+
+
 API Paths available:
-
-
 
 /
     (HTML login form)
@@ -34,3 +34,4 @@ API Paths available:
 
 /resource
     (Returns current user's email address)
+INYOUNGISADEVELOPER
