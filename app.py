@@ -45,6 +45,7 @@ class User(db.Model):
 
     @staticmethod
     def verify_auth_token(token):
+        print '48 - ' + token
         s = Serializer(app.config['SECRET_KEY'])
         try:
             data = s.loads(token)
@@ -82,6 +83,7 @@ def verify_password(email_or_token, password):
     if not user:
         # try to authenticate with username/password
         user = User.query.filter_by(email=email_or_token).first()
+        print '86'
         print user
         if not user or not user.verify_password(password):
             return False
@@ -104,7 +106,7 @@ def login():
         if User.query.filter_by(email=email).first() is not None:
             verify = verify_password(email, password)
             user = User(email=email)
-            print(verify)
+            print('108 - ' + verify)
             if verify:
                 print('You already in there\n')
                 return render_template('success.html')
@@ -118,6 +120,7 @@ def login():
         db.session.commit()
         return render_template('success.html')
     elif request.headers['Content-Type'] == 'application/json':
+        print '122'
         print(request.json)
         email = request.json.get('email')
         password = request.json.get('password')
@@ -126,9 +129,10 @@ def login():
         if User.query.filter_by(email=email).first() is not None:
             verify = verify_password(email, password)
             user = User(email=email)
-            print(verify)
+            print '130'
+            print verify
             if verify:
-                print('You already in there\n')
+                print('132 - You already in there\n')
                 return render_template('success.html')
             else:
                 print 'Login failed'
@@ -138,7 +142,9 @@ def login():
         User.hash_password(user, password)
         db.session.add(user)
         db.session.commit()
-        return jsonify({'email': user.email}), 201, {'Location': url_for('get_user', id=user.id, _external=True)}
+        verify_password(email, password)
+        token = g.user.generate_auth_token(600)
+        return jsonify({'email': user.email, 'authToken': token.decode('ascii')}), 201, {'Location': url_for('get_user', id=user.id, _external=True)}
 
 
 @app.route('/roof/add', methods=['POST'])
@@ -146,7 +152,8 @@ def login():
 def add_roof():
     print 'Requesting roof addition'
     if request.headers['Content-Type'] == 'application/json':
-        print(request.json)
+        print '155'
+        print request.json
         length = request.json.get('length')
         width = request.json.get('width')
         slope = request.json.get('slope')
@@ -167,7 +174,7 @@ def add_roof():
         roof = Roof(address=address, length=length, width=width, slope=slope, price=price)
         db.session.add(roof)
         db.session.commit()
-        print 'Created roof==> ' + roof
+        print 'Created roof==> ' + str(roof.serialize())
         return jsonify({'Roof': roof.serialize()}), 201, {
             'Location': url_for('get_roof', address=roof.address, _external=True)}
 
