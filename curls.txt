@@ -1,0 +1,4 @@
+curl -v -i -X POST -H "Content-Type: application/json"  -u eyJhbGciOiJIUzI1NiIsImV4cCI6MTQ4MDQ4NjIyMCwiaWF0IjoxNDgwNDg1NjIwfQ.eyJpZCI6N30.X_4i61NCuo387xOInT1i7mgQQ-5gOT6gnu90T3HNIh4:jigga -d'{"address":"87 Nizro Nebula","width":"50", "length":"100", "slope":"66.666", "price":"999.99"}' http://127.0.0.1:5000/roof/add 
+
+
+

@@ -2,7 +2,7 @@ from flask import Flask, abort, jsonify, url_for, render_template, g, request
 from flask.json import JSONEncoder
 from flask_sqlalchemy import SQLAlchemy
 from flask_httpauth import HTTPBasicAuth
-import decimal
+import decimal, re
 from passlib.apps import custom_app_context as pwd_context
 from itsdangerous import (TimedJSONWebSignatureSerializer as Serializer, BadSignature, SignatureExpired)
 
@@ -45,7 +45,7 @@ class User(db.Model):
 
     @staticmethod
     def verify_auth_token(token):
-        print '48 - ' + token
+        print ('48 - ' + token)
         s = Serializer(app.config['SECRET_KEY'])
         try:
             data = s.loads(token)
@@ -71,8 +71,8 @@ class Roof(db.Model):
     def serialize(self):
         return {
             'id': self.id,
-            'address': self.address,
-            'price': self.price,
+            'address': self.address.encode("utf-8"),
+            'price': re.sub("[^0-9^.]", "", str(self.price)),
         }
 
 
@@ -83,8 +83,8 @@ def verify_password(email_or_token, password):
     if not user:
         # try to authenticate with username/password
         user = User.query.filter_by(email=email_or_token).first()
-        print '86'
-        print user
+        print ('86')
+        print (user)
         if not user or not user.verify_password(password):
             return False
     g.user = user
@@ -111,7 +111,7 @@ def login():
                 print('You already in there\n')
                 return render_template('success.html')
             else:
-                print 'Login failed'
+                print ('Login failed')
                 return 'Login failed'
 
         user = User(email=email)
@@ -120,7 +120,7 @@ def login():
         db.session.commit()
         return render_template('success.html')
     elif request.headers['Content-Type'] == 'application/json':
-        print '122'
+        print ('122')
         print(request.json)
         email = request.json.get('email')
         password = request.json.get('password')
@@ -129,14 +129,16 @@ def login():
         if User.query.filter_by(email=email).first() is not None:
             verify = verify_password(email, password)
             user = User(email=email)
-            print '130'
+            print ('130')
             print verify
             if verify:
-                print('132 - You already in there\n')
-                return render_template('success.html')
+                print (g.user.id)
+                token = g.user.generate_auth_token(600)
+                return jsonify({'email': user.email, 'authToken': token.decode('ascii')}), 201, {
+                    'Location': url_for('get_user', id=g.user.id, _external=True)}
             else:
-                print 'Login failed'
-                return 'Login failed'
+                print ('Error: Login Unsuccessful')
+                return 'Error: Login Unsuccessful'
 
         user = User(email=email)
         User.hash_password(user, password)
@@ -150,9 +152,9 @@ def login():
 @app.route('/roof/add', methods=['POST'])
 @auth.login_required
 def add_roof():
-    print 'Requesting roof addition'
+    print ('Requesting roof addition')
     if request.headers['Content-Type'] == 'application/json':
-        print '155'
+        print ('155')
         print request.json
         length = request.json.get('length')
         width = request.json.get('width')
@@ -161,20 +163,20 @@ def add_roof():
         price = request.json.get('price')
 
         if length is None or width is None or slope is None or address is None or price is None:
-            print 'Something not set'
+            print ('Something not set')
             abort(400)
         if Roof.query.filter_by(address=address).first() is not None:
             roof = Roof(address=address, price=price)
-            print 'Found a roof'
+            print ('Found a roof')
             if roof is not None:
-                print 'Roof is not None'
+                print ('Roof is not None')
                 print str(roof.serialize())
                 return jsonify({'Roof': roof.serialize()}), 201
-        print 'Make new roof'
+        print ('Make new roof')
         roof = Roof(address=address, length=length, width=width, slope=slope, price=price)
         db.session.add(roof)
         db.session.commit()
-        print 'Created roof==> ' + str(roof.serialize())
+        print ('Created roof==> ' + str(roof.serialize()))
         return jsonify({'Roof': roof.serialize()}), 201, {
             'Location': url_for('get_roof', address=roof.address, _external=True)}
 
@@ -188,10 +190,10 @@ def get_user(id):
     return jsonify({'email': user.email, 'password': user.password_hash})
 
 
-@app.route('/roofs/<string:address>')
+@app.route('/roofs/<int:id>')
 @auth.login_required
-def get_roof(address):
-    roof = Roof.query.get(address=address)
+def get_roof(id):
+    roof = Roof.query.get(id)
     if not roof:
         abort(400)
     return jsonify({'Roof': roof.serialize()})
@@ -210,6 +212,24 @@ def get_resource():
     return jsonify({'data': 'Hello, %s!' % g.user.email})
 
 
+@app.route('/roofs/all', methods=['GET'])
+@auth.login_required
+def get_roofs():
+
+    roofs = Roof.query.all()
+    rStr = ''
+    i = 0
+    for roof in roofs:
+        # rStr += str(jsonify({i: (roof.serialize())}))
+        rStr += str((str(i)+":"+str((roof.serialize()))))
+        i += 1
+    rStr = jsonify(rStr[:-1])
+    if not roofs:
+        abort(400)
+    return jsonify({'Roofs': rStr}), 201
+
+
 if __name__ == '__main__':
     app.debug = True
+    # app.debug = False
     app.run()
