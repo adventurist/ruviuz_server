@@ -2,7 +2,7 @@ from flask import Flask, abort, jsonify, url_for, render_template, g, request
 from flask.json import JSONEncoder
 from flask_sqlalchemy import SQLAlchemy
 from flask_httpauth import HTTPBasicAuth
-import decimal, re
+import decimal, re, json
 from passlib.apps import custom_app_context as pwd_context
 from itsdangerous import (TimedJSONWebSignatureSerializer as Serializer, BadSignature, SignatureExpired)
 
@@ -71,8 +71,11 @@ class Roof(db.Model):
     def serialize(self):
         return {
             'id': self.id,
-            'address': self.address.encode("utf-8"),
+            'length': re.sub("[^0-9^.]", "", str(self.length)),
+            'width': re.sub("[^0-9^.]", "", str(self.width)),
+            'slope': re.sub("[^0-9^.]", "", str(self.slope)),
             'price': re.sub("[^0-9^.]", "", str(self.price)),
+            'address': self.address.encode("utf-8"),
         }
 
 
@@ -218,15 +221,35 @@ def get_roofs():
 
     roofs = Roof.query.all()
     rStr = ''
+    mJson = ''
+    rlist = [None] * 10
     i = 0
     for roof in roofs:
+
         # rStr += str(jsonify({i: (roof.serialize())}))
-        rStr += str((str(i)+":"+str((roof.serialize()))))
+        mJson += '{"roof":' + str(roof.serialize()).replace("'", '"') + '},'
+        rStr += (str([(str(i) + ":" + str((roof.serialize())))]))
+        rObj = (["\""+str(i)+"\"", str(roof.serialize())])
+        rlist.append(["roof", rObj])
         i += 1
-    rStr = jsonify(rStr[:-1])
+    # rStr = ("[" + rStr[:-1] + "]")
+    mJson = '{"Roofs":[' + str((mJson[:-1])) + ']}'
+    # rjson = json.dumps(rStr.replace('\\n', '\n').replace('\"', '"'))
+
     if not roofs:
         abort(400)
-    return jsonify({'Roofs': rStr}), 201
+    # return jsonify({'Roofs': rStr.replace("\\", "")}), 201
+    # return jsonify({'Roofs': str(rStr).replace('\\n', '\n').replace('\"', '"')}), 201
+    return (mJson.replace('\\"', '"')), 201
+
+
+def json_list(list):
+    lst = []
+    for pn in list:
+        d = {}
+        d['roof']=pn
+        lst.append(d)
+    return json.dumps(lst)
 
 
 if __name__ == '__main__':
