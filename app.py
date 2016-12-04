@@ -181,7 +181,7 @@ def add_roof():
         db.session.commit()
         print ('Created roof==> ' + str(roof.serialize()))
         return jsonify({'Roof': roof.serialize()}), 201, {
-            'Location': url_for('get_roof', address=roof.address, _external=True)}
+            'Location': url_for('get_roof', id=roof.id, _external=True)}
 
 
 @app.route('/users/<int:id>')
