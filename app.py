@@ -243,13 +243,40 @@ def get_roofs():
     return (mJson.replace('\\"', '"')), 201
 
 
-def json_list(list):
-    lst = []
-    for pn in list:
-        d = {}
-        d['roof']=pn
-        lst.append(d)
-    return json.dumps(lst)
+@app.route('/roofs/update/<int:id>', methods=['POST'])
+@auth.login_required
+def update_roof(id):
+
+    if request.headers['Content-Type'] == 'application/json':
+
+        print ('250')
+        print request.json
+        length = request.json.get('length')
+        width = request.json.get('width')
+        slope = request.json.get('slope')
+        address = request.json.get('address')
+        price = request.json.get('price')
+
+
+    # roof = Roof.query.get(id)
+    # if not roof:
+    #     abort(400)
+    # return jsonify({'Roof': roof.serialize()})
+    roof = Roof.query.get(id)
+    #get values
+    # roof.address = address
+    # roof.length = length
+    # roof.price = price
+    # roof.width = width
+    # roof.slope = slope
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        db.session.remove()
+
+
+
 
 
 if __name__ == '__main__':
