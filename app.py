@@ -197,6 +197,7 @@ def get_user(id):
 @auth.login_required
 def get_roof(id):
     roof = Roof.query.get(id)
+    print roof.serialize()
     if not roof:
         abort(400)
     return jsonify({'Roof': roof.serialize()})
@@ -243,12 +244,11 @@ def get_roofs():
     return (mJson.replace('\\"', '"')), 201
 
 
-@app.route('/roofs/update/<int:id>', methods=['POST'])
+@app.route('/roof/update/<int:id>', methods=['POST'])
 @auth.login_required
 def update_roof(id):
 
     if request.headers['Content-Type'] == 'application/json':
-
         print ('250')
         print request.json
         length = request.json.get('length')
@@ -257,27 +257,22 @@ def update_roof(id):
         address = request.json.get('address')
         price = request.json.get('price')
 
-
-    # roof = Roof.query.get(id)
-    # if not roof:
-    #     abort(400)
-    # return jsonify({'Roof': roof.serialize()})
     roof = Roof.query.get(id)
-    #get values
-    # roof.address = address
-    # roof.length = length
-    # roof.price = price
-    # roof.width = width
-    # roof.slope = slope
+    if not roof:
+        abort(400)
+
+    roof.address = address
+    roof.length = length
+    roof.price = price
+    roof.width = width
+    roof.slope = slope
     try:
         db.session.commit()
+        return jsonify({'Update': 'Success', 'Roof': roof.serialize()})
     except Exception as e:
         db.session.rollback()
         db.session.remove()
-
-
-
-
+        return jsonify({'Update': 'Fail'})
 
 if __name__ == '__main__':
     app.debug = True
