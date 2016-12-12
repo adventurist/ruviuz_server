@@ -2,14 +2,19 @@ from flask import Flask, abort, jsonify, url_for, render_template, g, request
 from flask.json import JSONEncoder
 from flask_sqlalchemy import SQLAlchemy
 from flask_httpauth import HTTPBasicAuth
-import decimal, re, json
+import decimal, re, os
 from passlib.apps import custom_app_context as pwd_context
 from itsdangerous import (TimedJSONWebSignatureSerializer as Serializer, BadSignature, SignatureExpired)
+from werkzeug.utils import secure_filename
+
+UPLOAD_FOLDER = '/media/logicp/Data1/data/ruv_uploads/'
+ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'geunyeorang cheoeum daehoa sijag hajamaja'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://ruvadmin:ge9BQ7fT8bVBgm1B@localhost/ruvapp'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 db = SQLAlchemy(app)
 auth = HTTPBasicAuth()
 
@@ -79,6 +84,23 @@ class Roof(db.Model):
         }
 
 
+class RuvFile(db.Model):
+    __tablename__ = "ruvfile"
+    id = db.Column(db.Integer, primary_key=True)
+    filename = db.Column(db.VARCHAR(128))
+    uri = db.Column(db.VARCHAR(255))
+    mime = db.Column(db.VARCHAR(64))
+    rid = db.Column(db.INTEGER)
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'filename': self.filename.encode("utf-8"),
+            'uri': self.uri.encode("utf-8"),
+            'rid': self.rid,
+        }
+
+
 @auth.verify_password
 def verify_password(email_or_token, password):
     # first try to authenticate by token
@@ -92,6 +114,11 @@ def verify_password(email_or_token, password):
             return False
     g.user = user
     return True
+
+
+def allowed_file(filename):
+    return '.' in filename and \
+        filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
 
 @app.route('/')
@@ -216,6 +243,29 @@ def get_resource():
     return jsonify({'data': 'Hello, %s!' % g.user.email})
 
 
+@app.route('/file/upload', methods=['GET', 'POST'])
+@auth.login_required
+def send_file():
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            return 'No files in upload request'
+        sendfile = request.files['file']
+        rid = request.form['rid']
+        if sendfile.filename == '':
+            return 'No specific filename'
+        if rid is None:
+            return 'No Roof ID provided'
+        if sendfile and allowed_file(sendfile.filename):
+            filename = secure_filename(sendfile.filename)
+            mime = sendfile.content_type
+            sendfile.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            ruvfile = RuvFile(filename=filename, uri=os.path.join(app.config['UPLOAD_FOLDER'], filename), rid=rid, mime=mime)
+            db.session.add(ruvfile)
+            db.session.commit()
+            print ('Created file==> ' + str(ruvfile.serialize()))
+            return jsonify({'File': ruvfile.serialize()}), 201
+
+
 @app.route('/roofs/all', methods=['GET'])
 @auth.login_required
 def get_roofs():
@@ -226,21 +276,15 @@ def get_roofs():
     rlist = [None] * 10
     i = 0
     for roof in roofs:
-
-        # rStr += str(jsonify({i: (roof.serialize())}))
         mJson += '{"roof":' + str(roof.serialize()).replace("'", '"') + '},'
         rStr += (str([(str(i) + ":" + str((roof.serialize())))]))
         rObj = (["\""+str(i)+"\"", str(roof.serialize())])
         rlist.append(["roof", rObj])
         i += 1
-    # rStr = ("[" + rStr[:-1] + "]")
     mJson = '{"Roofs":[' + str((mJson[:-1])) + ']}'
-    # rjson = json.dumps(rStr.replace('\\n', '\n').replace('\"', '"'))
 
     if not roofs:
         abort(400)
-    # return jsonify({'Roofs': rStr.replace("\\", "")}), 201
-    # return jsonify({'Roofs': str(rStr).replace('\\n', '\n').replace('\"', '"')}), 201
     return (mJson.replace('\\"', '"')), 201
 
 
