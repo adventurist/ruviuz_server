@@ -7,7 +7,7 @@ from passlib.apps import custom_app_context as pwd_context
 from itsdangerous import (TimedJSONWebSignatureSerializer as Serializer, BadSignature, SignatureExpired)
 from werkzeug.utils import secure_filename
 
-UPLOAD_FOLDER = '/media/logicp/Data1/data/ruv_uploads/'
+UPLOAD_FOLDER = './ruv_uploads/'
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
 app = Flask(__name__)
@@ -247,6 +247,8 @@ def get_resource():
 @auth.login_required
 def send_file():
     if request.method == 'POST':
+        print request.get_data
+        print str(request.get_json)
         if 'file' not in request.files:
             return 'No files in upload request'
         sendfile = request.files['file']
