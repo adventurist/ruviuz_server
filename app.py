@@ -251,9 +251,9 @@ def send_file():
         print str(request.args)
         print str(request.values)
         print str(request.get_json)
-        if 'file' not in request.files:
+        if 'upload' not in request.files:
             return 'No files in upload request'
-        sendfile = request.files['file']
+        sendfile = request.files['upload']
         rid = request.form['rid']
         if sendfile.filename == '':
             return 'No specific filename'
