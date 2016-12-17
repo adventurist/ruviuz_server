@@ -247,7 +247,9 @@ def get_resource():
 @auth.login_required
 def send_file():
     if request.method == 'POST':
-        print request.get_data
+        print str(request.files)
+        print str(request.args)
+        print str(request.values)
         print str(request.get_json)
         if 'file' not in request.files:
             return 'No files in upload request'
