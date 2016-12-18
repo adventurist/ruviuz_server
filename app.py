@@ -282,18 +282,19 @@ def get_roofs():
     # rlist = [None] * 10
     i = 0
     for roof in roofs:
-        mJson += '{"roof":' + str(roof.serialize()).replace("'", '"') + '},'
+        mJson += '{"roof":' + str(roof.serialize()).replace("'", '"')
         fQuery = RuvFile.query.filter_by(rid=roof.id)
         if fQuery.count() > 0:
+            fcount = 0
             fileResult = fQuery.all()
-
+            mJson += '"files":['
             for result in fileResult:
                 print result
-
-
-        # rStr += (str([(str(i) + ":" + str((roof.serialize())))]))
-        # rObj = (["\""+str(i)+"\"", str(roof.serialize())])
-        # rlist.append(["roof", rObj])
+                mJson += '{"' + fcount + '":"' + str(result.uri) + '"},'
+                fcount += 1
+            mJson = mJson[:-1]
+            mJson += ']'
+        mJson += '},'
         i += 1
     mJson = '{"Roofs":[' + str((mJson[:-1])) + ']}'
 
