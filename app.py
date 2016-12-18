@@ -286,7 +286,6 @@ def get_roofs():
         fQuery = RuvFile.query.filter_by(rid=roof.id)
         if fQuery.count() > 0:
             fileResult = fQuery.all()
-            ruvFile = RuvFile.query.get()
 
             for result in fileResult:
                 print result
