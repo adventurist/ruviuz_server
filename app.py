@@ -295,7 +295,7 @@ def get_roofs():
                 fcount += 1
             mJson = mJson[:-1]
             mJson += ']'
-        mJson += ','
+        mJson += '},'
         i += 1
     mJson = '{"Roofs":[' + str((mJson[:-1])) + ']}'
 
