@@ -340,8 +340,8 @@ def update_roof(id):
 
 @app.route('/ruv_uploads/<path:path>', methods='GET')
 def static_file(path):
-    print ('Attempting to serve this file: /ruv_uploads/' + str(path))
-    return app.send_static_file('/ruv_uploads/' + path)
+    print ('Attempting to serve this file: ' + str(os.path.join(app.config['UPLOAD_FOLDER']) + str(path)))
+    return app.send_static_file(os.path.join(app.config['UPLOAD_FOLDER']) + path)
 
 
 if __name__ == '__main__':
