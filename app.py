@@ -287,7 +287,7 @@ def get_roofs():
         if fQuery.count() > 0:
             fcount = 0
             fileResult = fQuery.all()
-            mJson += '"files":['
+            mJson += ',"files":['
             for result in fileResult:
                 print result
                 mJson += '{"' + str(fcount) + '":"' + str(result.uri) + '"},'
