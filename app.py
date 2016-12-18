@@ -337,6 +337,13 @@ def update_roof(id):
         db.session.remove()
         return jsonify({'Update': 'Fail'})
 
+
+@app.route('/ruv_uploads/<path:path>')
+def static_file(path):
+    print ('Attempting to serve this file: ' + str(path))
+    return app.send_static_file(path)
+
+
 if __name__ == '__main__':
     app.debug = True
     # app.debug = False
