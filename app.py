@@ -254,7 +254,9 @@ def send_file():
         if 'upload' not in request.files:
             return 'No files in upload request'
         sendfile = request.files['upload']
+        print str(sendfile)
         rid = request.form['rid']
+        print str(rid)
         if sendfile.filename == '':
             return 'No specific filename'
         if rid is None:
@@ -275,15 +277,24 @@ def send_file():
 def get_roofs():
 
     roofs = Roof.query.all()
-    rStr = ''
+    # rStr = ''
     mJson = ''
-    rlist = [None] * 10
+    # rlist = [None] * 10
     i = 0
     for roof in roofs:
         mJson += '{"roof":' + str(roof.serialize()).replace("'", '"') + '},'
-        rStr += (str([(str(i) + ":" + str((roof.serialize())))]))
-        rObj = (["\""+str(i)+"\"", str(roof.serialize())])
-        rlist.append(["roof", rObj])
+        fQuery = db.query(RuvFile).filter(rid=roof.id)
+        if fQuery.count() > 0:
+            fileResult = fQuery.all()
+            ruvFile = RuvFile.query.get()
+
+            for result in fileResult:
+                print result
+
+
+        # rStr += (str([(str(i) + ":" + str((roof.serialize())))]))
+        # rObj = (["\""+str(i)+"\"", str(roof.serialize())])
+        # rlist.append(["roof", rObj])
         i += 1
     mJson = '{"Roofs":[' + str((mJson[:-1])) + ']}'
 
