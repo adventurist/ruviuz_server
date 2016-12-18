@@ -283,7 +283,7 @@ def get_roofs():
     i = 0
     for roof in roofs:
         mJson += '{"roof":' + str(roof.serialize()).replace("'", '"') + '},'
-        fQuery = db.query(RuvFile).filter(rid=roof.id)
+        fQuery = RuvFile.query.filter(rid=roof.id)
         if fQuery.count() > 0:
             fileResult = fQuery.all()
             ruvFile = RuvFile.query.get()
