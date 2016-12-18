@@ -290,7 +290,7 @@ def get_roofs():
             mJson += '"files":['
             for result in fileResult:
                 print result
-                mJson += '{"' + fcount + '":"' + str(result.uri) + '"},'
+                mJson += '{"' + str(fcount) + '":"' + str(result.uri) + '"},'
                 fcount += 1
             mJson = mJson[:-1]
             mJson += ']'
