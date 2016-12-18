@@ -132,17 +132,18 @@ def login():
         email = request.form['email']
         password = request.form['password']
         if email is None or password is None:
+            return
             abort(400)
         if User.query.filter_by(email=email).first() is not None:
             verify = verify_password(email, password)
             user = User(email=email)
             print('108 - ' + verify)
             if verify:
-                print('You already in there\n')
+                print('User found!\n')
                 return render_template('success.html')
             else:
-                print ('Login failed')
-                return 'Login failed'
+                print ('Wrong Password.')
+                return 'Wrong Password'
 
         user = User(email=email)
         User.hash_password(user, password)
@@ -155,7 +156,7 @@ def login():
         email = request.json.get('email')
         password = request.json.get('password')
         if email is None or password is None:
-            abort(400)
+            abort(400, "What you thinking?")
         if User.query.filter_by(email=email).first() is not None:
             verify = verify_password(email, password)
             user = User(email=email)
@@ -167,8 +168,8 @@ def login():
                 return jsonify({'email': user.email, 'authToken': token.decode('ascii')}), 201, {
                     'Location': url_for('get_user', id=g.user.id, _external=True)}
             else:
-                print ('Error: Login Unsuccessful')
-                return 'Error: Login Unsuccessful'
+                print ('Error: Wrong Password')
+                return 'Wrong Password'
 
         user = User(email=email)
         User.hash_password(user, password)
@@ -176,6 +177,7 @@ def login():
         db.session.commit()
         verify_password(email, password)
         token = g.user.generate_auth_token(600)
+        print 'New User Created'
         return jsonify({'email': user.email, 'authToken': token.decode('ascii')}), 201, {'Location': url_for('get_user', id=user.id, _external=True)}
 
 
