@@ -338,10 +338,10 @@ def update_roof(id):
         return jsonify({'Update': 'Fail'})
 
 
-@app.route('/ruv_uploads/<path:path>')
+@app.route('/ruv_uploads/<path:path>', methods='GET')
 def static_file(path):
-    print ('Attempting to serve this file: ' + str(path))
-    return app.send_static_file(path)
+    print ('Attempting to serve this file: /ruv_uploads/' + str(path))
+    return app.send_static_file('/ruv_uploads/' + path)
 
 
 if __name__ == '__main__':
