@@ -300,6 +300,7 @@ def get_roofs():
 
     if not roofs:
         abort(400)
+    print str(mJson.replace('\\"', '"'))
     return (mJson.replace('\\"', '"')), 201
 
 
