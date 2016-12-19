@@ -1,4 +1,4 @@
-from flask import Flask, abort, jsonify, url_for, render_template, g, request
+from flask import Flask, abort, jsonify, url_for, render_template, g, request, send_from_directory
 from flask.json import JSONEncoder
 from flask_sqlalchemy import SQLAlchemy
 from flask_httpauth import HTTPBasicAuth
@@ -340,10 +340,11 @@ def update_roof(id):
         return jsonify({'Update': 'Fail'})
 
 
-@app.route('/<path:path>')
+@app.route('/files/<path:path>')
 def static_file(path):
-    print ('Attempting to serve this file: '  + str(path))
-    return app.send_static_file(path)
+    print ('Attempting to serve this file: ' + str(path))
+    # return app.send_static_file(path)
+    return send_from_directory('ruv_uploads', path)
     # return app.send_static_file('/var/www/ruviuz/ruv_uploads/ruviuzIMG20161217_140939.jpg')
 
 if __name__ == '__main__':
