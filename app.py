@@ -340,7 +340,7 @@ def update_roof(id):
         return jsonify({'Update': 'Fail'})
 
 
-@app.route('<path:path>')
+@app.route('/<path:path>')
 def static_file(path):
     print ('Attempting to serve this file: '  + str(path))
     return app.send_static_file(path)
