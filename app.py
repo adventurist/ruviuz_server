@@ -15,6 +15,8 @@ app.config['SECRET_KEY'] = 'geunyeorang cheoeum daehoa sijag hajamaja'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://ruvadmin:ge9BQ7fT8bVBgm1B@localhost/ruvapp'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app._static_folder = os.path.join(app.config['UPLOAD_FOLDER'])
+
 db = SQLAlchemy(app)
 auth = HTTPBasicAuth()
 
@@ -293,7 +295,7 @@ def get_roofs():
             mJson += ',"files":['
             for result in fileResult:
                 print result
-                mJson += '{"' + str(fcount) + '":"' + str(result.uri) + '"},'
+                mJson += '{"' + str(fcount) + '":"' + str(result.filename) + '"},'
                 fcount += 1
             mJson = mJson[:-1]
             mJson += ']}'
@@ -338,11 +340,11 @@ def update_roof(id):
         return jsonify({'Update': 'Fail'})
 
 
-@app.route('/ruv_uploads/<path:path>')
+@app.route('<path:path>')
 def static_file(path):
-    print ('Attempting to serve this file: ' + str(os.path.join(app.config['UPLOAD_FOLDER']) + str(path)))
-    # return app.send_static_file(os.path.join(app.config['UPLOAD_FOLDER']) + path)
-    return app.send_static_file('/var/www/ruviuz/ruv_uploads/ruviuzIMG20161217_140939.jpg')
+    print ('Attempting to serve this file: '  + str(path))
+    return app.send_static_file(path)
+    # return app.send_static_file('/var/www/ruviuz/ruv_uploads/ruviuzIMG20161217_140939.jpg')
 
 if __name__ == '__main__':
     app.debug = True
