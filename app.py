@@ -341,8 +341,8 @@ def update_roof(id):
 @app.route('/ruv_uploads/<path:path>')
 def static_file(path):
     print ('Attempting to serve this file: ' + str(os.path.join(app.config['UPLOAD_FOLDER']) + str(path)))
-    return app.send_static_file(os.path.join(app.config['UPLOAD_FOLDER']) + path)
-
+    # return app.send_static_file(os.path.join(app.config['UPLOAD_FOLDER']) + path)
+    return app.send_static_file('/var/www/ruviuz/ruv_uploads/ruviuzIMG20161217_140939.jpg')
 
 if __name__ == '__main__':
     app.debug = True
