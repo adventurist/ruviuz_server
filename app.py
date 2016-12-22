@@ -228,10 +228,14 @@ def get_user(id):
 @auth.login_required
 def get_roof(id):
     roof = Roof.query.get(id)
+    rfiles = RuvFile.query.filter_by(rid=id).all()
+    fstr = ''
+    for rfile in rfiles:
+        fstr += str(rfile.serialize())
     print roof.serialize()
     if not roof:
         abort(400)
-    return jsonify({'Roof': roof.serialize()})
+    return jsonify({'Roof': roof.serialize(), 'Files': fstr})
 
 
 @app.route('/token')
