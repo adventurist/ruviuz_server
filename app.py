@@ -329,8 +329,10 @@ def update_roof(id):
         price = request.json.get('price')
         files_not_found = '['
         if request.json.get('files') is not None:
-            files = json.loads(request.json.get('files'))
+            files = json.loads(str(request.json.get('files')))
+            filesjson = jsonify(request.json.get('files'))
             print str(files)
+            print str(filesjson)
             i = 0
             for key in files:
                 #get filename from file
@@ -340,6 +342,17 @@ def update_roof(id):
                 filename = file
                 if RuvFile.query.filter_by(rid=id, filename=filename).first() is not None:
                     print 'File not changed for RID==>' + str(id) +'\n with Filename==>' + filename
+                else:
+                    print 'Adding new file for RID==>' + str(id) + '\n with Filename==>' + filename
+                    files_not_found += '{' + str(i) + ':"'
+            for key in filesjson:
+                # get filename from file
+                file = filesjson[key]
+                returnStr = "The key and value are ({}) = ({})".format(key, file)
+                print returnStr
+                filename = file
+                if RuvFile.query.filter_by(rid=id, filename=file).first() is not None:
+                    print 'File not changed for RID==>' + str(id) + '\n with Filename==>' + filename
                 else:
                     print 'Adding new file for RID==>' + str(id) + '\n with Filename==>' + filename
                     files_not_found += '{' + str(i) + ':"'
