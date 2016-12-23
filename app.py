@@ -335,9 +335,9 @@ def update_roof(id):
                 #get filename from file
                 filename = 'placeholder'
                 if RuvFile.query.filter_by(rid=id, filename=filename).first() is not None:
-                    print 'File not changed for RID==>' + id +'\n with Filename==>' + filename
+                    print 'File not changed for RID==>' + str(id) +'\n with Filename==>' + filename
                 else:
-                    print 'Adding new file for RID==>' + id + '\n with Filename==>' + filename
+                    print 'Adding new file for RID==>' + str(id) + '\n with Filename==>' + filename
 
 
 
