@@ -2,7 +2,7 @@ from flask import Flask, abort, jsonify, url_for, render_template, g, request, s
 from flask.json import JSONEncoder
 from flask_sqlalchemy import SQLAlchemy
 from flask_httpauth import HTTPBasicAuth
-import decimal, re, os
+import decimal, re, os, json
 from passlib.apps import custom_app_context as pwd_context
 from itsdangerous import (TimedJSONWebSignatureSerializer as Serializer, BadSignature, SignatureExpired)
 from werkzeug.utils import secure_filename
@@ -329,15 +329,20 @@ def update_roof(id):
         price = request.json.get('price')
         files_not_found = '['
         if request.json.get('files') is not None:
-            files = request.json.get('files')
+            files = json.loads(request.json.get('files'))
             print str(files)
-            for file in files:
+            i = 0
+            for key in files:
                 #get filename from file
-                filename = 'placeholder'
+                file = files[key]
+                returnStr = "The key and value are ({}) = ({})".format(key, file)
+                print returnStr
+                filename = file
                 if RuvFile.query.filter_by(rid=id, filename=filename).first() is not None:
                     print 'File not changed for RID==>' + str(id) +'\n with Filename==>' + filename
                 else:
                     print 'Adding new file for RID==>' + str(id) + '\n with Filename==>' + filename
+                    files_not_found += '{' + str(i) + ':"'
 
 
 
