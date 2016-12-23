@@ -327,10 +327,10 @@ def update_roof(id):
         slope = request.json.get('slope')
         address = request.json.get('address')
         price = request.json.get('price')
-
+        files_not_found = '['
         if request.json.get('files') is not None:
             files = request.json.get('files')
-
+            print str(files)
             for file in files:
                 #get filename from file
                 filename = 'placeholder'
@@ -338,6 +338,7 @@ def update_roof(id):
                     print 'File not changed for RID==>' + str(id) +'\n with Filename==>' + filename
                 else:
                     print 'Adding new file for RID==>' + str(id) + '\n with Filename==>' + filename
+
 
 
 
