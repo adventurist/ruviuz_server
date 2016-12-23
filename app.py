@@ -93,6 +93,7 @@ class RuvFile(db.Model):
     uri = db.Column(db.VARCHAR(255))
     mime = db.Column(db.VARCHAR(64))
     rid = db.Column(db.INTEGER)
+    status = db.Column(db.INTEGER)
 
     def serialize(self):
         return {
@@ -233,6 +234,7 @@ def get_roof(id):
     for rfile in rfiles:
         fstr += str(rfile.serialize())
     print roof.serialize()
+    print fstr
     if not roof:
         abort(400)
     return jsonify({'Roof': roof.serialize(), 'Files': fstr})
@@ -325,6 +327,19 @@ def update_roof(id):
         slope = request.json.get('slope')
         address = request.json.get('address')
         price = request.json.get('price')
+
+        if request.json.get('files') is not None:
+            files = request.json.get('files')
+
+            for file in files:
+                #get filename from file
+                filename = 'placeholder'
+                if RuvFile.query.filter_by(rid=id, filename=filename).first() is not None:
+                    print 'File not changed for RID==>' + id +'\n with Filename==>' + filename
+                else:
+                    print 'Adding new file for RID==>' + id + '\n with Filename==>' + filename
+
+
 
     roof = Roof.query.get(id)
     if not roof:
