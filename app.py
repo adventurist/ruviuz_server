@@ -319,6 +319,7 @@ def get_roofs():
 @auth.login_required
 def update_roof(id):
 
+    global files_not_found
     if request.headers['Content-Type'] == 'application/json':
         print ('250')
         print request.json
@@ -327,7 +328,7 @@ def update_roof(id):
         slope = request.json.get('slope')
         address = request.json.get('address')
         price = request.json.get('price')
-        files_not_found = '['
+
         if request.json.get('files') is not None:
             files = request.json.get('files')
             filesjson = jsonify(request.json.get('files'))
@@ -336,17 +337,20 @@ def update_roof(id):
             i = 0
             for key in files:
                 #get filename from file
-                file = files[i]
+                # file = files[i]
                 # returnStr = "The key and value are ({}) = ({})".format(key, file)
-                filename = str(file["0"])
+                filename = str(files[i]["0"])
                 print 'Request to add filename to Roof with RID == ' + str(id)
                 if RuvFile.query.filter_by(rid=id, filename=filename).first() is not None:
                     print 'File not changed for RID==>' + str(id) +'\n with Filename==>' + filename
                 else:
                     print 'Adding new file for RID==>' + str(id) + '\n with Filename==>' + filename
-                    files_not_found += '{' + str(i) + ':"' + filename + '"},'
-        files_not_found = '{"filesToSend":' + files_not_found[:-1] + ']' + '}'
-        return files_not_found
+                    # files_not_found += '{' + str(i) + ':"' + filename + '"},'
+                    files_not_found += {i: filename}
+
+
+        # files_not_found = '{"filesToSend":' + files_not_found[:-1] + ']' + '}'
+
             # for key in filesjson:
             #     # get filename from file
             #     file = filesjson[key]
@@ -373,7 +377,7 @@ def update_roof(id):
     roof.slope = slope
     try:
         db.session.commit()
-        return jsonify({'Update': 'Success', 'Roof': roof.serialize()})
+        return jsonify({'Update': 'Success', 'Roof': roof.serialize(), 'FilesNotFound': files_not_found})
     except Exception as e:
         db.session.rollback()
         db.session.remove()
