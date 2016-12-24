@@ -319,10 +319,10 @@ def get_roofs():
 @auth.login_required
 def update_roof(id):
 
-    global files_not_found
     if request.headers['Content-Type'] == 'application/json':
         print ('250')
         print request.json
+        files_not_found = ''
         length = request.json.get('length')
         width = request.json.get('width')
         slope = request.json.get('slope')
@@ -349,39 +349,39 @@ def update_roof(id):
                     files_not_found += {i: filename}
 
 
-        # files_not_found = '{"filesToSend":' + files_not_found[:-1] + ']' + '}'
+                    # files_not_found = '{"filesToSend":' + files_not_found[:-1] + ']' + '}'
 
-            # for key in filesjson:
-            #     # get filename from file
-            #     file = filesjson[key]
-            #     returnStr = "The key and value are ({}) = ({})".format(key, file)
-            #     print returnStr
-            #     filename = file
-            #     if RuvFile.query.filter_by(rid=id, filename=file).first() is not None:
-            #         print 'File not changed for RID==>' + str(id) + '\n with Filename==>' + filename
-            #     else:
-            #         print 'Adding new file for RID==>' + str(id) + '\n with Filename==>' + filename
-            #         files_not_found += '{' + str(i) + ':"'
-
-
+                    # for key in filesjson:
+                    #     # get filename from file
+                    #     file = filesjson[key]
+                    #     returnStr = "The key and value are ({}) = ({})".format(key, file)
+                    #     print returnStr
+                    #     filename = file
+                    #     if RuvFile.query.filter_by(rid=id, filename=file).first() is not None:
+                    #         print 'File not changed for RID==>' + str(id) + '\n with Filename==>' + filename
+                    #     else:
+                    #         print 'Adding new file for RID==>' + str(id) + '\n with Filename==>' + filename
+                    #         files_not_found += '{' + str(i) + ':"'
 
 
-    roof = Roof.query.get(id)
-    if not roof:
-        abort(400)
 
-    roof.address = address
-    roof.length = length
-    roof.price = price
-    roof.width = width
-    roof.slope = slope
-    try:
-        db.session.commit()
-        return jsonify({'Update': 'Success', 'Roof': roof.serialize(), 'FilesNotFound': files_not_found})
-    except Exception as e:
-        db.session.rollback()
-        db.session.remove()
-        return jsonify({'Update': 'Fail'})
+
+        roof = Roof.query.get(id)
+        if not roof:
+            abort(400)
+
+        roof.address = address
+        roof.length = length
+        roof.price = price
+        roof.width = width
+        roof.slope = slope
+        try:
+            db.session.commit()
+            return jsonify({'Update': 'Success', 'Roof': roof.serialize(), 'FilesNotFound': files_not_found})
+        except Exception as e:
+            db.session.rollback()
+            db.session.remove()
+            return jsonify({'Update': 'Fail'})
 
 
 @app.route('/files/<path:path>')
