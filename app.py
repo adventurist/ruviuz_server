@@ -323,6 +323,7 @@ def update_roof(id):
         print ('250')
         print request.json
         files_not_found = ''
+        files_not_found_array = []
         length = request.json.get('length')
         width = request.json.get('width')
         slope = request.json.get('slope')
@@ -345,26 +346,9 @@ def update_roof(id):
                     print 'File not changed for RID==>' + str(id) +'\n with Filename==>' + filename
                 else:
                     print 'Adding new file for RID==>' + str(id) + '\n with Filename==>' + filename
-                    # files_not_found += '{' + str(i) + ':"' + filename + '"},'
                     files_not_found += str({i: filename})
-
-
-                    # files_not_found = '{"filesToSend":' + files_not_found[:-1] + ']' + '}'
-
-                    # for key in filesjson:
-                    #     # get filename from file
-                    #     file = filesjson[key]
-                    #     returnStr = "The key and value are ({}) = ({})".format(key, file)
-                    #     print returnStr
-                    #     filename = file
-                    #     if RuvFile.query.filter_by(rid=id, filename=file).first() is not None:
-                    #         print 'File not changed for RID==>' + str(id) + '\n with Filename==>' + filename
-                    #     else:
-                    #         print 'Adding new file for RID==>' + str(id) + '\n with Filename==>' + filename
-                    #         files_not_found += '{' + str(i) + ':"'
-
-
-
+                    files_not_found_array.insert(i, {i: filename})
+            i += 1
 
         roof = Roof.query.get(id)
         if not roof:
@@ -377,6 +361,7 @@ def update_roof(id):
         roof.slope = slope
         try:
             db.session.commit()
+            print str(files_not_found_array)
             return jsonify({'Update': 'Success', 'Roof': roof.serialize(), 'FilesNotFound': files_not_found})
         except Exception as e:
             db.session.rollback()
