@@ -329,7 +329,7 @@ def update_roof(id):
         price = request.json.get('price')
         files_not_found = '['
         if request.json.get('files') is not None:
-            files = json.loads(str(request.json.get('files')))
+            files = request.json.get('files')
             filesjson = jsonify(request.json.get('files'))
             print str(files)
             print str(filesjson)
