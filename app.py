@@ -337,7 +337,8 @@ def update_roof(id):
             for key in files:
                 #get filename from file
                 file = files[i]
-                returnStr = "The key and value are ({}) = ({})".format(key, file)
+                # returnStr = "The key and value are ({}) = ({})".format(key, file)
+                returnStr = str(file)
                 print returnStr
                 filename = file
                 if RuvFile.query.filter_by(rid=id, filename=filename).first() is not None:
