@@ -346,7 +346,7 @@ def update_roof(id):
                     print 'Adding new file for RID==>' + str(id) + '\n with Filename==>' + filename
                     files_not_found += '{' + str(i) + ':"' + filename + '"},'
         files_not_found = '{"filesToSend":' + files_not_found[:-1] + ']' + '}'
-        return jsonify({'filesToSend', files_not_found})
+        return files_not_found
             # for key in filesjson:
             #     # get filename from file
             #     file = filesjson[key]
