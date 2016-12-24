@@ -338,25 +338,26 @@ def update_roof(id):
                 #get filename from file
                 file = files[i]
                 # returnStr = "The key and value are ({}) = ({})".format(key, file)
-                returnStr = str(file["0"])
-                print returnStr
-                filename = file
+                filename = str(file["0"])
+                print 'Request to add filename to Roof with RID == ' + str(id)
                 if RuvFile.query.filter_by(rid=id, filename=filename).first() is not None:
                     print 'File not changed for RID==>' + str(id) +'\n with Filename==>' + filename
                 else:
                     print 'Adding new file for RID==>' + str(id) + '\n with Filename==>' + filename
-                    files_not_found += '{' + str(i) + ':"'
-            for key in filesjson:
-                # get filename from file
-                file = filesjson[key]
-                returnStr = "The key and value are ({}) = ({})".format(key, file)
-                print returnStr
-                filename = file
-                if RuvFile.query.filter_by(rid=id, filename=file).first() is not None:
-                    print 'File not changed for RID==>' + str(id) + '\n with Filename==>' + filename
-                else:
-                    print 'Adding new file for RID==>' + str(id) + '\n with Filename==>' + filename
-                    files_not_found += '{' + str(i) + ':"'
+                    files_not_found += '{' + str(i) + ':"' + filename + '"},'
+        files_not_found = files_not_found[:-1] + ']'
+        return jsonify({'filesToSend', files_not_found})
+            # for key in filesjson:
+            #     # get filename from file
+            #     file = filesjson[key]
+            #     returnStr = "The key and value are ({}) = ({})".format(key, file)
+            #     print returnStr
+            #     filename = file
+            #     if RuvFile.query.filter_by(rid=id, filename=file).first() is not None:
+            #         print 'File not changed for RID==>' + str(id) + '\n with Filename==>' + filename
+            #     else:
+            #         print 'Adding new file for RID==>' + str(id) + '\n with Filename==>' + filename
+            #         files_not_found += '{' + str(i) + ':"'
 
 
 
