@@ -336,7 +336,7 @@ def update_roof(id):
             i = 0
             for key in files:
                 #get filename from file
-                file = files[key]
+                file = files[i]
                 returnStr = "The key and value are ({}) = ({})".format(key, file)
                 print returnStr
                 filename = file
