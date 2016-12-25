@@ -361,7 +361,7 @@ def update_roof(id):
             db.session.commit()
             print str(files_not_found_array)
             print files_not_found
-            return json.dumps({'Update': 'Success', 'Roof': roof.serialize(), 'FilesNotFound': files_not_found})
+            return jsonify({'Update': 'Success', 'Roof': roof.serialize(), 'FilesNotFound': files_not_found})
         except Exception as e:
             db.session.rollback()
             db.session.remove()
