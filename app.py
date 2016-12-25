@@ -322,7 +322,7 @@ def update_roof(id):
     if request.headers['Content-Type'] == 'application/json':
         print ('250')
         print request.json
-        files_not_found = ''
+        files_not_found = '['
         files_not_found_array = []
         length = request.json.get('length')
         width = request.json.get('width')
@@ -343,9 +343,10 @@ def update_roof(id):
                     print 'File not changed for RID==>' + str(id) + '\n with Filename==>' + filename
                 else:
                     print 'Adding new file for RID==>' + str(id) + '\n with Filename==>' + filename
-                    files_not_found += str(({'file': filename}))
+                    files_not_found += '"file": "' + filename + '",'
                     files_not_found_array.insert(i, {i: filename})
                 i += 1
+            files_not_found = files_not_found[:-1] + ']'
 
         roof = Roof.query.get(id)
         if not roof:
