@@ -337,7 +337,7 @@ def update_roof(id):
             print str(filesjson)
             i = 0
             for key in files:
-                filename = str(files[i]["0"])
+                filename = str(files[i]["file"])
                 print 'Request to add filename to Roof with RID == ' + str(id)
                 if RuvFile.query.filter_by(rid=id, filename=filename).first() is not None:
                     print 'File not changed for RID==>' + str(id) + '\n with Filename==>' + filename
@@ -345,7 +345,7 @@ def update_roof(id):
                     print 'Adding new file for RID==>' + str(id) + '\n with Filename==>' + filename
                     files_not_found += str({i: filename})
                     files_not_found_array.insert(i, {i: filename})
-            i += 1
+                i += 1
 
         roof = Roof.query.get(id)
         if not roof:
