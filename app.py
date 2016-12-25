@@ -337,13 +337,10 @@ def update_roof(id):
             print str(filesjson)
             i = 0
             for key in files:
-                #get filename from file
-                # file = files[i]
-                # returnStr = "The key and value are ({}) = ({})".format(key, file)
                 filename = str(files[i]["0"])
                 print 'Request to add filename to Roof with RID == ' + str(id)
                 if RuvFile.query.filter_by(rid=id, filename=filename).first() is not None:
-                    print 'File not changed for RID==>' + str(id) +'\n with Filename==>' + filename
+                    print 'File not changed for RID==>' + str(id) + '\n with Filename==>' + filename
                 else:
                     print 'Adding new file for RID==>' + str(id) + '\n with Filename==>' + filename
                     files_not_found += str({i: filename})
@@ -362,6 +359,7 @@ def update_roof(id):
         try:
             db.session.commit()
             print str(files_not_found_array)
+            print files_not_found
             return jsonify({'Update': 'Success', 'Roof': roof.serialize(), 'FilesNotFound': files_not_found})
         except Exception as e:
             db.session.rollback()
