@@ -84,6 +84,8 @@ class Roof(db.Model):
             'width': re.sub("[^0-9^.]", "", str(self.width)),
             'slope': re.sub("[^0-9^.]", "", str(self.slope)),
             'price': re.sub("[^0-9^.]", "", str(self.price)),
+            'address_id': self.address_id,
+            'customer_id': self.customer_id,
             'address': self.address.encode("utf-8"),
         }
 
@@ -239,10 +241,13 @@ def add_roof():
     if request.headers['Content-Type'] == 'application/json':
         print ('155')
         print request.json
+        address = request.json.get('address')
+        city = request.json.get('city')
+        region = request.json.get('region')
+        postal = request.json.get('postal')
         length = request.json.get('length')
         width = request.json.get('width')
         slope = request.json.get('slope')
-        address = request.json.get('address')
         price = request.json.get('price')
 
         if length is None or width is None or slope is None or address is None or price is None:
@@ -256,12 +261,23 @@ def add_roof():
                 print str(roof.serialize())
                 return jsonify({'Roof': roof.serialize()}), 201
         print ('Make new roof')
-        roof = Roof(address=address, length=length, width=width, slope=slope, price=price)
-        db.session.add(roof)
-        db.session.commit()
-        print ('Created roof==> ' + str(roof.serialize()))
-        return jsonify({'Roof': roof.serialize()}), 201, {
-            'Location': url_for('get_roof', id=roof.id, _external=True)}
+
+        newaddress = Address(city=city, region=region, postal=postal, country='Canada', address=address)
+
+        try:
+            db.session.add(newaddress)
+            db.commit()
+        except Exception as e:
+            print e.message
+            return jsonify({'AddressIssue': 'Fail', 'ErrorDetails': 'Unable to create new address in database'})
+
+        if newaddress is not None:
+            roof = Roof(address=address, length=length, width=width, slope=slope, price=price, address_id=newaddress.id)
+            db.session.add(roof)
+            db.session.commit()
+            print ('Created roof==> ' + str(roof.serialize()))
+            return jsonify({'Roof': roof.serialize()}), 201, {
+                'Location': url_for('get_roof', id=roof.id, _external=True)}
 
 
 @app.route('/users/<int:id>')
