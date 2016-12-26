@@ -338,12 +338,13 @@ def update_roof(id):
             i = 0
             for file in files:
                 filename = str(file["file"])
+                num = str(file["num"])
                 print 'Request to add filename to Roof with RID == ' + str(id)
                 if RuvFile.query.filter_by(rid=id, filename=filename).first() is not None:
                     print 'File not changed for RID==>' + str(id) + '\n with Filename==>' + filename
                 else:
                     print 'Adding new file for RID==>' + str(id) + '\n with Filename==>' + filename
-                    files_not_found += '{"file": "' + filename + '"},'
+                    files_not_found += '{"file": "' + filename + '", "num": "' + num + '},'
                     files_not_found_array.insert(i, {i: filename})
                 i += 1
             files_not_found = files_not_found[:-1] + ']'
