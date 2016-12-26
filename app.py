@@ -266,7 +266,7 @@ def add_roof():
 
         try:
             db.session.add(newaddress)
-            db.commit()
+            db.session.commit()
         except Exception as e:
             print e.message
             return jsonify({'AddressIssue': 'Fail', 'ErrorDetails': 'Unable to create new address in database'})
