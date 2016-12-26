@@ -228,7 +228,8 @@ def login():
         verify_password(email, password)
         token = g.user.generate_auth_token(600)
         print 'New User Created'
-        return jsonify({'email': user.email, 'authToken': token.decode('ascii')}), 201, {'Location': url_for('get_user', id=user.id, _external=True)}
+        return jsonify({'email': user.email, 'authToken': token.decode('ascii')}), 201, {'Location': url_for('get_user',
+                        id=user.id, _external=True)}
 
 
 @app.route('/roof/add', methods=['POST'])
@@ -276,7 +277,7 @@ def get_user(id):
 @auth.login_required
 def get_roof(id):
     roof = Roof.query.get(id)
-    rfiles = RuvFile.query.filter_by(rid=id).all()
+    rfiles = RuvFile.query.filter_by(rid=id, status=1).all()
     fstr = ''
     for rfile in rfiles:
         fstr += str(rfile.serialize())
@@ -322,7 +323,19 @@ def send_file():
             filename = secure_filename(sendfile.filename)
             mime = sendfile.content_type
             sendfile.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            ruvfile = RuvFile(filename=filename, uri=os.path.join(app.config['UPLOAD_FOLDER'], filename), rid=rid, mime=mime)
+            if RuvFile.query.filter_by(rid=rid, status=1).count() >= 3:
+                file_unpublish = RuvFile(rid=rid, status=1).first()
+                file_unpublish(status=0)
+                try:
+                    db.session.commit()
+                except Exception as e:
+                    db.session.rollback()
+                    db.session.remove()
+                return jsonify({'FileIssue': 'Fail', 'ErrorDetails': 'Unable to unpublish existing file. There are '
+                                                                     'currently too many published files. New file '
+                                                                     'will not be saved'})
+            ruvfile = RuvFile(filename=filename, uri=os.path.join(app.config['UPLOAD_FOLDER'], filename), rid=rid,
+                              mime=mime, status=1)
             db.session.add(ruvfile)
             db.session.commit()
             print ('Created file==> ' + str(ruvfile.serialize()))
@@ -334,13 +347,11 @@ def send_file():
 def get_roofs():
 
     roofs = Roof.query.all()
-    # rStr = ''
     mJson = ''
-    # rlist = [None] * 10
     i = 0
     for roof in roofs:
         mJson += '{"roof":' + str(roof.serialize()).replace("'", '"')
-        fQuery = RuvFile.query.filter_by(rid=roof.id)
+        fQuery = RuvFile.query.filter_by(rid=roof.id, status=1)
         if fQuery.count() > 0:
             fcount = 0
             fileResult = fQuery.all()
@@ -387,8 +398,10 @@ def update_roof(id):
                 filename = str(file["file"])
                 num = str(file["num"])
                 print 'Request to add filename to Roof with RID == ' + str(id)
-                if RuvFile.query.filter_by(rid=id, filename=filename).first() is not None:
+                if RuvFile.query.filter_by(rid=id, filename=filename, status=1).first() is not None:
+                    existing_file = RuvFile(rid=id, filename=filename, status=1).first()
                     print 'File not changed for RID==>' + str(id) + '\n with Filename==>' + filename
+                    print 'Existing File: ' + existing_file.serialize()
                 else:
                     print 'Adding new file for RID==>' + str(id) + '\n with Filename==>' + filename
                     files_not_found += '{"file": "' + filename + '", "num": "' + num + '"},'
@@ -419,9 +432,7 @@ def update_roof(id):
 @app.route('/files/<path:path>')
 def static_file(path):
     print ('Attempting to serve this file: ' + str(path))
-    # return app.send_static_file(path)
     return send_from_directory('ruv_uploads', path)
-    # return app.send_static_file('/var/www/ruviuz/ruv_uploads/ruviuzIMG20161217_140939.jpg')
 
 if __name__ == '__main__':
     app.debug = True
