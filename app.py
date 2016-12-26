@@ -74,6 +74,8 @@ class Roof(db.Model):
     slope = db.Column(db.Float)
     price = db.Column(db.DECIMAL(10, 2))
     address = db.Column(db.VARCHAR(255))
+    address_id = db.Column(db.Integer)
+    customer_id = db.Column(db.Integer)
 
     def serialize(self):
         return {
@@ -102,6 +104,51 @@ class RuvFile(db.Model):
             'uri': self.uri.encode("utf-8"),
             'rid': self.rid,
         }
+
+
+class Address(db.Model):
+    __tablename__ = "address"
+    id = db.Column(db.Integer, primary_key=True)
+    country = db.Column(db.VARCHAR(64))
+    region = db.Column(db.VARCHAR(96))
+    city = db.Column(db.VARCHAR(96))
+    postal = db.Column(db.VARCHAR(32))
+    address = db.Column(db.VARCHAR(255))
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'country': self.country.encode("utf-8"),
+            'region': self.region.encode("utf-8"),
+            'city': self.city.encode("utf-8"),
+            'postal': self.postal.encode("utf-8"),
+            'address': self.address.encode("utf-8"),
+        }
+
+
+class Customer(db.Model):
+    __tablename__ = "customer"
+    id = db.Column(db.Integer, primary_key=True)
+    first = db.Column(db.VARCHAR(96))
+    last = db.Column(db.VARCHAR(96))
+    married = db.Column(db.Boolean(96))
+    address_id = db.Column(db.Integer)
+    phone = db.Column(db.VARCHAR(20))
+    email = db.Column(db.VARCHAR(128))
+    referred_by = db.Column(db.Integer)
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'first': self.first.encode("utf-8"),
+            'last': self.last.encode("utf-8"),
+            'married': self.married,
+            'address_id': self.address_id,
+            'phone': self.phone.encode("utf-8"),
+            'email': self.email.encode("utf-8"),
+            'referred_by': self.referred_by,
+        }
+
 
 
 @auth.verify_password
