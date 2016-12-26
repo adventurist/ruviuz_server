@@ -344,7 +344,7 @@ def update_roof(id):
                     print 'File not changed for RID==>' + str(id) + '\n with Filename==>' + filename
                 else:
                     print 'Adding new file for RID==>' + str(id) + '\n with Filename==>' + filename
-                    files_not_found += '{"file": "' + filename + '", "num": "' + num + '},'
+                    files_not_found += '{"file": "' + filename + '", "num": "' + num + '"},'
                     files_not_found_array.insert(i, {i: filename})
                 i += 1
             files_not_found = files_not_found[:-1] + ']'
