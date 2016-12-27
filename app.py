@@ -294,9 +294,10 @@ def get_user(id):
 def get_roof(id):
     roof = Roof.query.get(id)
     rfiles = RuvFile.query.filter_by(rid=id, status=1).all()
-    fstr = ''
+    fstr = '['
     for rfile in rfiles:
-        fstr += str(rfile.serialize())
+        fstr += '{"file": "' + rfile.serialize() + '"},'
+    fstr = fstr[:-1] + ']'
     print roof.serialize()
     print fstr
     if not roof:
@@ -397,7 +398,6 @@ def update_roof(id):
         print ('250')
         print request.json
         files_not_found = '['
-        files_not_found_array = []
         length = request.json.get('length')
         width = request.json.get('width')
         slope = request.json.get('slope')
@@ -421,7 +421,6 @@ def update_roof(id):
                 else:
                     print 'Adding new file for RID==>' + str(id) + '\n with Filename==>' + filename
                     files_not_found += '{"file": "' + filename + '", "num": "' + num + '"},'
-                    files_not_found_array.insert(i, {i: filename})
                 i += 1
             files_not_found = files_not_found[:-1] + ']'
 
