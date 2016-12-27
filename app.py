@@ -296,7 +296,7 @@ def get_roof(id):
     rfiles = RuvFile.query.filter_by(rid=id, status=1).all()
     fstr = '['
     for rfile in rfiles:
-        fstr += '{"file": "' + rfile.serialize() + '"},'
+        fstr += '{"file": "' + str(rfile.serialize()) + '"},'
     fstr = fstr[:-1] + ']'
     print roof.serialize()
     print fstr
