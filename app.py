@@ -296,7 +296,7 @@ def get_roof(id):
     rfiles = RuvFile.query.filter_by(rid=id, status=1).all()
     fstr = '['
     for rfile in rfiles:
-        fstr += '{"file": "' + str(rfile.serialize()) + '"},'
+        fstr += '{"file": "' + rfile.filename + '"},'
     fstr = fstr[:-1] + ']'
     print roof.serialize()
     print fstr
@@ -435,7 +435,6 @@ def update_roof(id):
         roof.slope = slope
         try:
             db.session.commit()
-            print str(files_not_found_array)
             print files_not_found
             return jsonify({'Update': 'Success', 'Roof': roof.serialize(), 'FilesNotFound': files_not_found})
         except Exception as e:
