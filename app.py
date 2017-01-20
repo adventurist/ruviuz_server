@@ -15,6 +15,7 @@ app.config['SECRET_KEY'] = 'geunyeorang cheoeum daehoa sijag hajamaja'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://ruvadmin:ge9BQ7fT8bVBgm1B@localhost/ruvapp'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['PROPAGATE_EXCEPTIONS'] = True
 app._static_folder = os.path.join(app.config['UPLOAD_FOLDER'])
 
 db = SQLAlchemy(app)
