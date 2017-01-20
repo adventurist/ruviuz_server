@@ -116,6 +116,7 @@ class Address(db.Model):
     city = db.Column(db.VARCHAR(96))
     postal = db.Column(db.VARCHAR(32))
     address = db.Column(db.VARCHAR(255))
+    customer_id = db.Column(db.Integer)
 
     def serialize(self):
         return {
@@ -131,6 +132,7 @@ class Address(db.Model):
 class Customer(db.Model):
     __tablename__ = "customer"
     id = db.Column(db.Integer, primary_key=True)
+    prefix = db.Column(db.VARCHAR(3))
     first = db.Column(db.VARCHAR(96))
     last = db.Column(db.VARCHAR(96))
     married = db.Column(db.Boolean(96))
@@ -249,8 +251,13 @@ def add_roof():
         width = request.json.get('width')
         slope = request.json.get('slope')
         price = request.json.get('price')
+        firstname = request.json.get('firstName')
+        lastname = request.json.get('lastName')
+        email = request.json.get('email')
+        phone = request.json.get('phone')
+        prefix = request.json.get('prefix')
 
-        if length is None or width is None or slope is None or address is None or price is None:
+        if length is None or width is None or slope is None or address is None or price or firstname is None:
             print ('Something not set')
             abort(400)
         if Roof.query.filter_by(address=address).first() is not None:
@@ -259,20 +266,32 @@ def add_roof():
             if roof is not None:
                 print ('Roof is not None')
                 print str(roof.serialize())
-                return jsonify({'Roof': roof.serialize()}), 201
+                return jsonify({'Roof': roof.serialize()}), 200
         print ('Make new roof')
 
-        newaddress = Address(city=city, region=region, postal=postal, country='Canada', address=address)
+        newaddress = None
+        newcustomer = Customer(prefix=prefix, firstname=firstname, lastname=lastname, email=email, phone=phone)
 
         try:
-            db.session.add(newaddress)
+            db.session.add(newcustomer)
             db.session.commit()
         except Exception as e:
             print e.message
-            return jsonify({'AddressIssue': 'Fail', 'ErrorDetails': 'Unable to create new address in database'})
+            return jsonify({'CustomerIssue': 'Fail', 'ErrorDetails': 'Unable to create new customer in database'})
 
-        if newaddress is not None:
-            roof = Roof(address=address, length=length, width=width, slope=slope, price=price, address_id=newaddress.id)
+        if newcustomer is not None:
+
+            newaddress = Address(city=city, region=region, postal=postal, country='Canada', address=address)
+
+            try:
+                db.session.add(newaddress)
+                db.session.commit()
+            except Exception as e:
+                print e.message
+                return jsonify({'AddressIssue': 'Fail', 'ErrorDetails': 'Unable to create new address in database'})
+
+        if newaddress is not None and newcustomer is not None:
+            roof = Roof(address=address, length=length, width=width, slope=slope, price=price, address_id=newaddress.id, customer_id=newcustomer.id)
             db.session.add(roof)
             db.session.commit()
             print ('Created roof==> ' + str(roof.serialize()))
@@ -362,7 +381,7 @@ def send_file():
 @app.route('/roofs/all', methods=['GET'])
 @auth.login_required
 def get_roofs():
-
+#TODO reorder roofs with newest first
     roofs = Roof.query.all()
     mJson = ''
     i = 0
