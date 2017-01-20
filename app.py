@@ -271,7 +271,7 @@ def add_roof():
         print ('Make new roof')
 
         newaddress = None
-        newcustomer = Customer(prefix=prefix, firstname=firstname, lastname=lastname, email=email, phone=phone)
+        newcustomer = Customer(prefix=prefix, first=firstname, last=lastname, email=email, phone=phone)
 
         try:
             db.session.add(newcustomer)
