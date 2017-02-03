@@ -2,7 +2,7 @@ from flask import Flask, abort, jsonify, url_for, render_template, g, request, s
 from flask.json import JSONEncoder
 from flask_sqlalchemy import SQLAlchemy
 from flask_httpauth import HTTPBasicAuth
-import decimal, re, os, json
+import decimal, re, os, json, datetime
 from passlib.apps import custom_app_context as pwd_context
 from itsdangerous import (TimedJSONWebSignatureSerializer as Serializer, BadSignature, SignatureExpired)
 from werkzeug.utils import secure_filename
@@ -23,7 +23,6 @@ auth = HTTPBasicAuth()
 
 
 class MJSONEncoder(JSONEncoder):
-
     def default(self, obj):
         if isinstance(obj, decimal.Decimal):
             # Convert decimal instances to strings.
@@ -130,6 +129,22 @@ class Address(db.Model):
         }
 
 
+class Comment(db.Model):
+    __tablename__ = "comment"
+    id = db.Column(db.Integer, primary_key=True)
+    ruvfid = db.Column(db.Integer)
+    entry_date = db.Column(db.TIMESTAMP)
+    body = db.Column(db.String(512))
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'ruvfid': self.ruvfid,
+            'date': self.date,
+            'body': self.body.encode("utf-8"),
+        }
+
+
 class Customer(db.Model):
     __tablename__ = "customer"
     id = db.Column(db.Integer, primary_key=True)
@@ -155,7 +170,6 @@ class Customer(db.Model):
         }
 
 
-
 @auth.verify_password
 def verify_password(email_or_token, password):
     # first try to authenticate by token
@@ -173,7 +187,7 @@ def verify_password(email_or_token, password):
 
 def allowed_file(filename):
     return '.' in filename and \
-        filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+           filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
 
 @app.route('/')
@@ -234,7 +248,8 @@ def login():
         token = g.user.generate_auth_token(600)
         print 'New User Created'
         return jsonify({'email': user.email, 'authToken': token.decode('ascii')}), 201, {'Location': url_for('get_user',
-                        id=user.id, _external=True)}
+                                                                                                             id=user.id,
+                                                                                                             _external=True)}
 
 
 @app.route('/roof/add', methods=['POST'])
@@ -281,7 +296,6 @@ def add_roof():
             return jsonify({'CustomerIssue': 'Fail', 'ErrorDetails': 'Unable to create new customer in database'})
 
         if newcustomer is not None:
-
             newaddress = Address(city=city, region=region, postal=postal, country='Canada', address=address)
 
             try:
@@ -292,7 +306,8 @@ def add_roof():
                 return jsonify({'AddressIssue': 'Fail', 'ErrorDetails': 'Unable to create new address in database'})
 
         if newaddress is not None and newcustomer is not None:
-            roof = Roof(address=address, length=length, width=width, slope=slope, price=price, address_id=newaddress.id, customer_id=newcustomer.id)
+            roof = Roof(address=address, length=length, width=width, slope=slope, price=price, address_id=newaddress.id,
+                        customer_id=newcustomer.id)
             db.session.add(roof)
             db.session.commit()
             print ('Created roof==> ' + str(roof.serialize()))
@@ -314,9 +329,19 @@ def get_user(id):
 def get_roof(id):
     roof = Roof.query.get(id)
     rfiles = RuvFile.query.filter_by(rid=id, status=1).all()
+    rcustomers = Customer.query.filter_by(id=roof.customer_id).all()
+    raddresses = Address.query.filter_by(id=roof.address_id).all()
     fstr = '['
     for rfile in rfiles:
         fstr += '{"file": "' + rfile.filename + '"},'
+    # fstr = fstr[:-1] + '],'
+    # fstr += '['
+    # for rcustomer in rcustomers:
+    #     fstr += '{"customer": "' + rcustomer.id + '"},'
+    # fstr = fstr[:-1] + '],'
+    # fstr += '['
+    # for rfile in rfiles:
+    #     fstr += '{"address": "' + rfile.filename + '"},'
     fstr = fstr[:-1] + ']'
     print roof.serialize()
     print fstr
@@ -379,15 +404,44 @@ def send_file():
             return jsonify({'File': ruvfile.serialize()}), 201
 
 
+@app.route('/comment/add', methods=['GET', 'POST'])
+@auth.login_required
+def new_comment():
+    if request.method == 'POST':
+        if request.headers['Content-Type'] == 'application/json':
+            print request.json
+            comment_body = request.json.get('comment_body')
+            ruvfid = request.json.get('ruvfid')
+            entry_date = request.json.get('entry_date')
+
+            if entry_date is None:
+                entry_date = ('{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()))
+            if comment_body is None or ruvfid is None or entry_date is None:
+                return 'Insufficient data to generate comment entry'
+            if Comment.query.filter_by(body=comment_body).first() is not None:
+                comment = Comment(body=comment_body)
+                print ('Found the same comment')
+                if comment is not None:
+                    print str(comment.serialize())
+                    return jsonify({'Comment': comment.serialize()}), 202
+            print ('Make new comment')
+            new_comment = Comment(comment_body=comment_body, ruvfid=ruvfid, entry_date=entry_date);
+            db.session.add(new_comment)
+            db.session.commit()
+            print ('Created comment==> ' + str(new_comment.serialize()))
+            return jsonify({'Comment': new_comment.serialize()}), 201
+
+
 @app.route('/roofs/all', methods=['GET'])
 @auth.login_required
 def get_roofs():
-#TODO reorder roofs with newest first
+    # TODO reorder roofs with newest first
     roofs = Roof.query.all()
     mJson = ''
     i = 0
     for roof in roofs:
         mJson += '{"roof":' + str(roof.serialize()).replace("'", '"')
+        cQuery = Customer.query.filter_by(id=roof.customer_id)
         fQuery = RuvFile.query.filter_by(rid=roof.id, status=1)
         if fQuery.count() > 0:
             fcount = 0
@@ -413,7 +467,6 @@ def get_roofs():
 @app.route('/roof/update/<int:id>', methods=['POST'])
 @auth.login_required
 def update_roof(id):
-
     if request.headers['Content-Type'] == 'application/json':
         print ('250')
         print request.json
@@ -467,6 +520,7 @@ def update_roof(id):
 def static_file(path):
     print ('Attempting to serve this file: ' + str(path))
     return send_from_directory('ruv_uploads', path)
+
 
 if __name__ == '__main__':
     app.debug = True
