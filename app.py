@@ -422,6 +422,17 @@ def create_comment():
                 comment = Comment(body=comment_body)
                 print ('Found the same comment')
                 if comment is not None:
+                    if comment.entry_date is None and entry_date is not None:
+                        comment.entry_date = entry_date
+                        try:
+                            db.session.commit()
+                            print comment.serialize()
+                            return jsonify(
+                                {'Update': 'Success', 'Comment': comment.serialize()})
+                        except Exception as e:
+                            db.session.rollback()
+                            db.session.remove()
+                            return jsonify({'Update': 'Fail'})
                     print str(comment.serialize())
                     return jsonify({'Comment': comment.serialize()}), 202
             print ('Make new comment')
