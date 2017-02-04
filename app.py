@@ -140,7 +140,7 @@ class Comment(db.Model):
         return {
             'id': self.id,
             'ruvfid': self.ruvfid,
-            'date': self.date,
+            'entry_date': self.entry_date,
             'body': self.body.encode("utf-8"),
         }
 
