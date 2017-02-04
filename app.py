@@ -406,7 +406,7 @@ def send_file():
 
 @app.route('/comment/add', methods=['GET', 'POST'])
 @auth.login_required
-def new_comment():
+def create_comment():
     if request.method == 'POST':
         if request.headers['Content-Type'] == 'application/json':
             print request.json
@@ -425,7 +425,7 @@ def new_comment():
                     print str(comment.serialize())
                     return jsonify({'Comment': comment.serialize()}), 202
             print ('Make new comment')
-            new_comment = Comment(comment_body=comment_body, ruvfid=ruvfid, entry_date=entry_date);
+            new_comment = Comment(body=comment_body, ruvfid=ruvfid, entry_date=entry_date)
             db.session.add(new_comment)
             db.session.commit()
             print ('Created comment==> ' + str(new_comment.serialize()))
