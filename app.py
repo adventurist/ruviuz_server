@@ -465,6 +465,7 @@ def get_roofs():
             for result in fileResult:
                 print result.serialize()
                 comment = Comment.query.filter_by(ruvfid=result.id, status=1).one_or_none()
+                print (comment)
                 mJson += '{"' + str(fcount) + '":"' + str(result.filename) + '"'
                 if comment is not None:
                     mJson += ', "comment":"' + comment.body + '"},'
