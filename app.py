@@ -135,6 +135,7 @@ class Comment(db.Model):
     ruvfid = db.Column(db.Integer)
     entry_date = db.Column(db.TIMESTAMP)
     body = db.Column(db.String(512))
+    status = db.Column(db.Integer)
 
     def serialize(self):
         return {
@@ -142,6 +143,7 @@ class Comment(db.Model):
             'ruvfid': self.ruvfid,
             'entry_date': self.entry_date,
             'body': self.body.encode("utf-8"),
+            'status': self.status,
         }
 
 
@@ -334,20 +336,21 @@ def get_roof(id):
     fstr = '['
     for rfile in rfiles:
         fstr += '{"file": "' + rfile.filename + '"},'
-    # fstr = fstr[:-1] + '],'
-    # fstr += '['
-    # for rcustomer in rcustomers:
-    #     fstr += '{"customer": "' + rcustomer.id + '"},'
-    # fstr = fstr[:-1] + '],'
-    # fstr += '['
-    # for rfile in rfiles:
-    #     fstr += '{"address": "' + rfile.filename + '"},'
     fstr = fstr[:-1] + ']'
+    cstr = '['
+    for rcustomer in rcustomers:
+        cstr += '{"customer": "' + rcustomer.id + '"},'
+    cstr = fstr[:-1] + ']'
+    astr = '['
+    for address in raddresses:
+        astr += '{"address": [{"address": "' + address.address + '", {"region": "' + address.region + '", "city": "' \
+                + address.city + '", "postal": "' + address.postal + '"]},'
+    astr = astr[:-1]
     print roof.serialize()
     print fstr
     if not roof:
         abort(400)
-    return jsonify({'Roof': roof.serialize(), 'Files': fstr})
+    return jsonify({'Roof': roof.serialize(), 'Files': fstr, 'Customers': cstr, 'Address': astr})
 
 
 @app.route('/token')
@@ -411,7 +414,7 @@ def create_comment():
         if request.headers['Content-Type'] == 'application/json':
             print request.json
             comment_body = request.json.get('comment_body')
-            ruvfid = request.json.get('ruvfid')
+            ruvfid = int(request.json.get('ruvfid'))
             entry_date = request.json.get('entry_date')
 
             if entry_date is None:
@@ -436,7 +439,7 @@ def create_comment():
                     print str(comment.serialize())
                     return jsonify({'Comment': comment.serialize()}), 202
             print ('Make new comment')
-            new_comment = Comment(body=comment_body, ruvfid=ruvfid, entry_date=entry_date)
+            new_comment = Comment(body=comment_body, ruvfid=ruvfid, entry_date=entry_date, status=1)
             db.session.add(new_comment)
             db.session.commit()
             print ('Created comment==> ' + str(new_comment.serialize()))
@@ -461,7 +464,12 @@ def get_roofs():
             mJson += ',"files":['
             for result in fileResult:
                 print result
-                mJson += '{"' + str(fcount) + '":"' + str(result.filename) + '"},'
+                comment = Comment.query.filter_by(ruvfid=result.id, status=1).one_or_none()
+                mJson += '{"' + str(fcount) + '":"' + str(result.filename) + '"'
+                if comment is not None:
+                    mJson += ', "comment":"' + comment.body + '"},'
+                else:
+                    mJson += '},'
                 fcount += 1
             mJson = mJson[:-1]
             mJson += ']}'
