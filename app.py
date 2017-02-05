@@ -339,7 +339,7 @@ def get_roof(id):
     fstr = fstr[:-1] + ']'
     cstr = '['
     for rcustomer in rcustomers:
-        cstr += '{"customer": "' + rcustomer.id + '"},'
+        cstr += '{"customer": "' + str(rcustomer.id) + '"},'
     cstr = fstr[:-1] + ']'
     astr = '['
     for address in raddresses:
@@ -468,7 +468,7 @@ def get_roofs():
                 print (comment)
                 mJson += '{"' + str(fcount) + '":"' + str(result.filename) + '"'
                 if comment is not None:
-                    mJson += ', "comment":"' + comment.body + '"},'
+                    mJson += ',"comment":"' + comment.body + '"},'
                 else:
                     mJson += '},'
                 fcount += 1
