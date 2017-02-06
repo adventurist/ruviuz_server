@@ -461,12 +461,12 @@ def get_roofs():
         if cQuery.count() > 0:
             if cQuery.count() > 1:
                 print 'Too many customers are associated with this roof'
-                mJson += ',{"customer":"Multiple customers"}'
+                mJson += ',"customer":"Multiple customers"'
             else:
                 cResult = cQuery.first()
-                mJson += ',{"customer":"' + cResult.first + ' ' + cResult.last + '"}'
+                mJson += ',"customer":"' + cResult.first + ' ' + cResult.last + '"'
         else:
-            mJson += ',{"customer":"None"}'
+            mJson += ',"customer":"None"'
         if fQuery.count() > 0:
             fcount = 0
             fileResult = fQuery.all()
