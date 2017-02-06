@@ -458,6 +458,7 @@ def get_roofs():
         mJson += '{"roof":' + str(roof.serialize()).replace("'", '"')
         cQuery = Customer.query.filter_by(id=roof.customer_id)
         fQuery = RuvFile.query.filter_by(rid=roof.id, status=1)
+        mJson = mJson[:-1]
         if cQuery.count() > 0:
             if cQuery.count() > 1:
                 print 'Too many customers are associated with this roof'
