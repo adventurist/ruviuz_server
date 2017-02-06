@@ -461,7 +461,7 @@ def get_roofs():
         if cQuery.count() > 0:
             cResult = cQuery.first()
             mJson = mJson[:-1]
-            mJson += ',"customer":"' + cResult.first + ' ' + cResult.last + '",'
+            mJson += ',"customer":"' + cResult.first + ' ' + cResult.last + '"'
         if fQuery.count() > 0:
             fcount = 0
             fileResult = fQuery.all()
