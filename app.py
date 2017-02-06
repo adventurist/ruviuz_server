@@ -464,12 +464,10 @@ def get_roofs():
                 mJson += ',{"customer":"Multiple customers"}'
             else:
                 cResult = cQuery.first()
-                # mJson += ',{"customer":"' + cResult.first + ' ' + cResult.last + '"}'
-                mJson += ',{"customer":"Jason Klumpt"}'
+                mJson += ',{"customer":"' + cResult.first + ' ' + cResult.last + '"},'
         if fQuery.count() > 0:
             fcount = 0
             fileResult = fQuery.all()
-            mJson = mJson[:-1]
             mJson += ',"files":['
             for result in fileResult:
                 print result.serialize()
