@@ -458,19 +458,14 @@ def get_roofs():
         mJson += '{"roof":' + str(roof.serialize()).replace("'", '"')
         cQuery = Customer.query.filter_by(id=roof.customer_id)
         fQuery = RuvFile.query.filter_by(rid=roof.id, status=1)
-        mJson = mJson[:-1]
         if cQuery.count() > 0:
-            if cQuery.count() > 1:
-                print 'Too many customers are associated with this roof'
-                mJson += ',"customer":"Multiple customers"'
-            else:
-                cResult = cQuery.first()
-                mJson += ',"customer":"' + cResult.first + ' ' + cResult.last + '"'
-        else:
-            mJson += ',"customer":"None"'
+            cResult = cQuery.first()
+            mJson = mJson[:-1]
+            mJson += ',"customer":"' + cResult.first + ' ' + cResult.last + '",'
         if fQuery.count() > 0:
             fcount = 0
             fileResult = fQuery.all()
+            mJson = mJson[:-1]
             mJson += ',"files":['
             for result in fileResult:
                 print result.serialize()
@@ -484,8 +479,6 @@ def get_roofs():
                 fcount += 1
             mJson = mJson[:-1]
             mJson += ']}'
-        else:
-            mJson = mJson[:-1] + '}'
         mJson += '},'
         i += 1
     mJson = '{"Roofs":[' + str((mJson[:-1])) + ']}'
