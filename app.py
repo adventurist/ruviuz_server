@@ -25,7 +25,6 @@ auth = HTTPBasicAuth()
 class MJSONEncoder(JSONEncoder):
     def default(self, obj):
         if isinstance(obj, decimal.Decimal):
-            # Convert decimal instances to strings.
             return str(obj)
         return super(MJSONEncoder, self).default(obj)
 
@@ -174,12 +173,9 @@ class Customer(db.Model):
 
 @auth.verify_password
 def verify_password(email_or_token, password):
-    # first try to authenticate by token
     user = User.verify_auth_token(email_or_token)
     if not user:
-        # try to authenticate with username/password
         user = User.query.filter_by(email=email_or_token).first()
-        print ('86')
         print (user)
         if not user or not user.verify_password(password):
             return False
@@ -335,7 +331,12 @@ def get_roof(id):
     raddresses = Address.query.filter_by(id=roof.address_id).all()
     fstr = '['
     for rfile in rfiles:
-        fstr += '{"file": "' + rfile.filename + '"},'
+        comment = Comment.query.filter_by(ruvfid=rfile.id, status=1).one_or_none()
+        fstr += '{"file": "' + rfile.filename + '"'
+        if comment is not None:
+            fstr += ',"comment":"' + comment.body + '"},'
+        else:
+            fstr += '"},'
     fstr = fstr[:-1] + ']'
     cstr = '['
     for rcustomer in rcustomers:
@@ -457,6 +458,13 @@ def get_roofs():
         mJson += '{"roof":' + str(roof.serialize()).replace("'", '"')
         cQuery = Customer.query.filter_by(id=roof.customer_id)
         fQuery = RuvFile.query.filter_by(rid=roof.id, status=1)
+        if cQuery.count() > 0:
+            if cQuery.count() > 1:
+                print 'Too many customers are associated with this roof'
+                mJson += ',{"customer":"Multiple customers"}'
+            else:
+                cResult = cQuery.first()
+                mJson += ',{"customer":"' + cResult.first + ' ' + cResult.last + '"}'
         if fQuery.count() > 0:
             fcount = 0
             fileResult = fQuery.all()
