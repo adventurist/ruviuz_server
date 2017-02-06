@@ -336,7 +336,7 @@ def get_roof(id):
         if comment is not None:
             fstr += ',"comment":"' + comment.body + '"},'
         else:
-            fstr += '"},'
+            fstr += '},'
     fstr = fstr[:-1] + ']'
     cstr = '['
     for rcustomer in rcustomers:
