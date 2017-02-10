@@ -6,6 +6,7 @@ import decimal, re, os, json, datetime
 from passlib.apps import custom_app_context as pwd_context
 from itsdangerous import (TimedJSONWebSignatureSerializer as Serializer, BadSignature, SignatureExpired)
 from werkzeug.utils import secure_filename
+from calculate import Calculator
 
 UPLOAD_FOLDER = './ruv_uploads/'
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
@@ -75,6 +76,7 @@ class Roof(db.Model):
     address = db.Column(db.VARCHAR(255))
     address_id = db.Column(db.Integer)
     customer_id = db.Column(db.Integer)
+    sections = db.relationship('Section', backref='roof', cascade='all, delete-orphan', lazy='dynamic')
 
     def serialize(self):
         return {
@@ -86,6 +88,27 @@ class Roof(db.Model):
             'address_id': self.address_id,
             'customer_id': self.customer_id,
             'address': self.address.encode("utf-8"),
+        }
+
+
+class Section(db.Model):
+    __tablename__ = "section"
+    id = db.Column(db.Integer, primary_key=True)
+    length = db.Column(db.DECIMAL(10, 3))
+    width = db.Column(db.DECIMAL(10, 3))
+    full = db.Column(db.Boolean)
+    empty = db.Column(db.DECIMAL(10, 3))
+    slope = db.Column(db.Float)
+    rid = db.Column(db.Integer, db.ForeignKey('roofs.id'))
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'length': re.sub("[^0-9^.]", "", str(self.length)),
+            'width': re.sub("[^0-9^.]", "", str(self.width)),
+            'slope': re.sub("[^0-9^.]", "", str(self.slope)),
+            'empty': re.sub("[^0-9^.]", "", str(self.empty)),
+            'full': self.full,
         }
 
 
@@ -357,6 +380,8 @@ def get_roof(id):
 @app.route('/token')
 @auth.login_required
 def get_auth_token():
+    print request
+    print request.args
     token = g.user.generate_auth_token(600)
     return jsonify({'token': token.decode('ascii'), 'duration': 600})
 
@@ -547,6 +572,15 @@ def update_roof(id):
 def static_file(path):
     print ('Attempting to serve this file: ' + str(path))
     return send_from_directory('ruv_uploads', path)
+
+
+@app.route('/calculate/<int:ruvid>', methods=['GET', 'POST'])
+@auth.login_required
+def get_estimate(ruvid):
+    calculator = Calculator(ruvid)
+    sections = calculator.get_sections()
+    total_area = calculator.calculate
+    price_estimate = calculator.get_estimate(total_area, Calculator.roof_types.Aluminum)
 
 
 if __name__ == '__main__':
