@@ -432,6 +432,52 @@ def send_file():
             print ('Created file==> ' + str(ruvfile.serialize()))
             return jsonify({'File': ruvfile.serialize()}), 201
 
+#
+# @app.route('/section/add', methods=['GET', 'POST'])
+# @auth.login_required
+# def create_section():
+#     # length = db.Column(db.DECIMAL(10, 3))
+#     # width = db.Column(db.DECIMAL(10, 3))
+#     # full = db.Column(db.Boolean)
+#     # empty = db.Column(db.DECIMAL(10, 3))
+#     # slope = db.Column(db.Float)
+#     # rid = db.Column(db.Integer, db.ForeignKey('roofs.id'))
+#     if request.method == 'POST':
+#         if request.headers['Content-Type'] == 'application/json':
+#             print request.json
+#             length = request.json.get('length')
+#             width = request.json.get('width')
+#             slope = request.json.get('slope')
+#             empty = request.json.get('empty')
+#             ruvfid = request.json.get('rid')
+#             full = request.json.get('full')
+#
+#             if length is None or width is None or slope is None or empty is None or ruvfid is None or full is None:
+#                 return 'Insufficient data to create new section'
+#             if Section.query.filter_by(rid=ruvfid).first() is not None:
+#                 comment = Comment(body=comment_body)
+#                 print ('Found the same comment')
+#                 if comment is not None:
+#                     if comment.entry_date is None and entry_date is not None:
+#                         comment.entry_date = entry_date
+#                         try:
+#                             db.session.commit()
+#                             print comment.serialize()
+#                             return jsonify(
+#                                 {'Update': 'Success', 'Comment': comment.serialize()})
+#                         except Exception as e:
+#                             db.session.rollback()
+#                             db.session.remove()
+#                             return jsonify({'Update': 'Fail'})
+#                     print str(comment.serialize())
+#                     return jsonify({'Comment': comment.serialize()}), 202
+#             print ('Make new comment')
+#             new_comment = Comment(body=comment_body, ruvfid=ruvfid, entry_date=entry_date, status=1)
+#             db.session.add(new_comment)
+#             db.session.commit()
+#             print ('Created comment==> ' + str(new_comment.serialize()))
+#             return jsonify({'Comment': new_comment.serialize()}), 201
+
 
 @app.route('/comment/add', methods=['GET', 'POST'])
 @auth.login_required
