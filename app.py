@@ -297,10 +297,10 @@ def add_roof():
         if length is None or width is None or slope is None or address is None or price is None or firstname is None:
             print ('Something not set')
             abort(400)
-        if Address.query.filter_by(address=address).first() is not None:
-            address = Address(address=address)
+        if Roof.query.filter_by(address=address).first() is not None:
+            roof = Address(address=address)
             print ('Found a roof')
-            if address is not None:
+            if roof is not None:
                 print ('Found a roof at the following address: ')
                 # print str(address.serialize())
                 # return jsonify({'Address': address.serialize()}), 200
