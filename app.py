@@ -298,7 +298,7 @@ def add_roof():
             print ('Something not set')
             abort(400)
         if Address.query.filter_by(address=address).first() is not None:
-            address = Address(address=address, price=price)
+            address = Address(address=address)
             print ('Found a roof')
             if address is not None:
                 print ('Found a roof at the following address: ')
