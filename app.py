@@ -302,7 +302,7 @@ def add_roof():
             print ('Found a roof')
             if address is not None:
                 print ('Found a roof at the following address: ')
-                print str(address.serialize())
+                # print str(address.serialize())
                 # return jsonify({'Address': address.serialize()}), 200
         print ('Make new roof')
 
