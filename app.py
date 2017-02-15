@@ -284,8 +284,6 @@ def add_roof():
         city = request.json.get('city')
         region = request.json.get('region')
         postal = request.json.get('postal')
-        length = request.json.get('length')
-        width = request.json.get('width')
         slope = request.json.get('slope')
         price = request.json.get('price')
         firstname = request.json.get('firstName')
@@ -294,7 +292,7 @@ def add_roof():
         phone = request.json.get('phone')
         prefix = request.json.get('prefix')
 
-        if length is None or width is None or slope is None or address is None or price is None or firstname is None:
+        if slope is None or address is None or price is None or firstname is None:
             print ('Something not set')
             abort(400)
         if Roof.query.filter_by(address=address).first() is not None:
@@ -327,7 +325,7 @@ def add_roof():
                 return jsonify({'AddressIssue': 'Fail', 'ErrorDetails': 'Unable to create new address in database'})
 
         if newaddress is not None and newcustomer is not None:
-            roof = Roof(address=address, length=length, width=width, slope=slope, price=price, address_id=newaddress.id,
+            roof = Roof(address=address, slope=slope, price=price, address_id=newaddress.id,
                         customer_id=newcustomer.id)
             db.session.add(roof)
             db.session.commit()
