@@ -515,6 +515,10 @@ def get_roofs():
             cResult = cQuery.first()
             mJson = mJson[:-1]
             mJson += ',"customer":"' + cResult.first + ' ' + cResult.last + '",'
+            aResult = Address.query.filter_by(customer_id = cResult.id).one_or_none()
+            if aResult is not None:
+                mJson += '"address":"' + aResult.serialize() + '",'
+
         if sQuery.count() > 0:
             sResult = sQuery.all()
             scount = 0
