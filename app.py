@@ -520,7 +520,7 @@ def get_roofs():
             scount = 0
             mJson += '"sections":['
             for section in sResult:
-                mJson += '{"' + str(scount) + '":"' + section.serialize() + '"},'
+                mJson += '{"' + str(scount) + '":"' + str(section.serialize()) + '"},'
                 scount += 1
             mJson = mJson[:-1] + ']},'
         if fQuery.count() > 0:
