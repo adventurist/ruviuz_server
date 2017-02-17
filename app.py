@@ -518,11 +518,11 @@ def get_roofs():
         if sQuery.count() > 0:
             sResult = sQuery.all()
             scount = 0
-            mJson += '"sections":['
+            mJson += '{"sections":['
             for section in sResult:
                 mJson += '{"' + str(scount) + '":"' + str(section.serialize()) + '"},'
                 scount += 1
-            mJson = mJson[:-1] + '],'
+            mJson = mJson[:-1] + ']},'
         if fQuery.count() > 0:
             fcount = 0
             fileResult = fQuery.all()
