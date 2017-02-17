@@ -503,7 +503,7 @@ def create_comment():
 @auth.login_required
 def get_roofs():
     # TODO reorder roofs with newest first
-    roofs = Roof.query.all()
+    roofs = Roof.query.limit(20).order_by(Roof.id.desc()).limit(20).all()
     mJson = ''
     i = 0
     for roof in roofs:
@@ -511,14 +511,14 @@ def get_roofs():
         cQuery = Customer.query.filter_by(id=roof.customer_id)
         fQuery = RuvFile.query.filter_by(rid=roof.id, status=1)
         sQuery = Section.query.filter_by(rid=roof.id)
+        # aResult = Address.query.filter_by(id=roof.address_id).one_or_none()
+        # if aResult is not None:
+        #     mJson += '"address":"' + aResult.serialize() + '",'
+
         if cQuery.count() > 0:
             cResult = cQuery.first()
             mJson = mJson[:-1]
             mJson += ',"customer":"' + cResult.first + ' ' + cResult.last + '",'
-            aResult = Address.query.filter_by(customer_id = cResult.id).one_or_none()
-            if aResult is not None:
-                mJson += '"address":"' + aResult.serialize() + '",'
-
         if sQuery.count() > 0:
             sResult = sQuery.all()
             scount = 0
