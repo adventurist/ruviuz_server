@@ -555,6 +555,8 @@ def get_roofs():
                     etype = EmptyType.query.filter_by(sid=section.id).one_or_none()
                     if etype is not None:
                         mJson += '"empty":"' + str(etype.area) + '", "etype":"' + etype.name + '"},'
+                else:
+                    mJson = mJson[:-1] + '},'
 
                 scount += 1
             mJson = mJson[:-1] + '],'
