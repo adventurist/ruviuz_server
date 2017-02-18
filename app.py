@@ -525,7 +525,7 @@ def get_roofs():
             mJson = mJson[:-1]
             mJson += ',"sections":['
             for section in sResult:
-                mJson += '{"' + str(scount) + '":"' + str(section.slope) + '"},'
+                mJson += '{"slope":"' + str(section.slope) + '", "length":"' + str(section.length) + '", "width":"' + str(section.width) + '", "full":"' + str(section.full) + '", "empty":"' + str(section.empty) + '"},'
                 scount += 1
             mJson = mJson[:-1] + '],'
         if fQuery.count() > 0:
