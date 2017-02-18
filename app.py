@@ -116,7 +116,7 @@ class Section(db.Model):
 class EmptyType(db.Model):
     __tablename__ = "emptytype"
     id = db.Column(db.Integer, primary_key=True)
-    sid = db.Column(db.Integer, db.ForeignKeyConstraint('section.id'))
+    sid = db.Column(db.Integer, db.ForeignKey('section.id'))
     name = db.Column(db.VARCHAR(64))
     area = db.Column(db.Float)
 
