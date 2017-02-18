@@ -100,6 +100,7 @@ class Section(db.Model):
     empty = db.Column(db.DECIMAL(10, 3))
     slope = db.Column(db.Float)
     rid = db.Column(db.Integer, db.ForeignKey('roofs.id'))
+    emptytype = db.relationship('EmptyType', backref='section', cascade='all, delete-orphan', lazy='dynamic')
 
     def serialize(self):
         return {
@@ -109,6 +110,22 @@ class Section(db.Model):
             'slope': re.sub("[^0-9^.]", "", str(self.slope)),
             'empty': re.sub("[^0-9^.]", "", str(self.empty)),
             'full': self.full,
+        }
+
+
+class EmptyType(db.Model):
+    __tablename__ = "emptytype"
+    id = db.Column(db.Integer, primary_key=True)
+    sid = db.Column(db.Integer, db.ForeignKeyConstraint('section.id'))
+    name = db.Column(db.VARCHAR(64))
+    area = db.Column(db.Float)
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'sid': self.sid,
+            'name': re.sub("[^0-9^.]", "", str(self.name)),
+            'area': re.sub("[^0-9^.]", "", str(self.area)),
         }
 
 
@@ -456,6 +473,14 @@ def create_section():
             new_section = Section(rid=ruvfid, length=length, width=width, empty=empty, full=full, slope=slope)
             db.session.add(new_section)
             db.session.commit()
+            if full == -1:
+                earea = request.json.get("missing")
+                etype = request.json.get("etype")
+                if etype is not None:
+                    emptytype = EmptyType(sid=new_section.id, name=etype, area=earea)
+                    db.session.add(emptytype)
+                    db.session.commit()
+
             print ('Created section ==> ' + str(new_section.serialize()))
             return jsonify({'Section': new_section.serialize()}), 201
 
@@ -525,7 +550,12 @@ def get_roofs():
             mJson = mJson[:-1]
             mJson += ',"sections":['
             for section in sResult:
-                mJson += '{"slope":"' + str(section.slope) + '", "length":"' + str(section.length) + '", "width":"' + str(section.width) + '", "full":"' + str(section.full) + '", "empty":"' + str(section.empty) + '"},'
+                mJson += '{"slope":"' + str(section.slope) + '", "length":"' + str(section.length) + '", "width":"' + str(section.width) + '", "full":"' + str(section.full) + '",'
+                if section.full == -1:
+                    etype = EmptyType.query.filter_by(sid=section.id).one_or_none()
+                    if etype is not None:
+                        mJson += '"empty":"' + str(etype.area) + '", "etype":"' + etype.name + '"},'
+
                 scount += 1
             mJson = mJson[:-1] + '],'
         if fQuery.count() > 0:
