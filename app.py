@@ -474,9 +474,12 @@ def create_section():
             db.session.add(new_section)
             db.session.commit()
             if not full:
+                print ('Saving Empty Type')
                 etype = request.json.get("etype")
+                print (etype)
                 if etype is not None:
                     emptytype = EmptyType(sid=new_section.id, name=etype, area=missing)
+                    print str(emptytype.serialize())
                     db.session.add(emptytype)
                     db.session.commit()
 
