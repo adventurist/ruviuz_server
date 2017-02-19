@@ -459,7 +459,7 @@ def create_section():
             slope = request.json.get('slope')
             empty = request.json.get('empty')
             ruvfid = request.json.get('rid')
-            full = request.json.get('full')
+            full = True if request.json.get('full') == 1 else False
 
             if length is None or width is None or slope is None or empty is None or ruvfid is None or full is None:
                 print 'Insufficient data to create new section'
