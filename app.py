@@ -473,11 +473,10 @@ def create_section():
             new_section = Section(rid=ruvfid, length=length, width=width, empty=missing, full=full, slope=slope)
             db.session.add(new_section)
             db.session.commit()
-            if full == -1:
-                earea = request.json.get("missing")
+            if not full:
                 etype = request.json.get("etype")
                 if etype is not None:
-                    emptytype = EmptyType(sid=new_section.id, name=etype, area=earea)
+                    emptytype = EmptyType(sid=new_section.id, name=etype, area=missing)
                     db.session.add(emptytype)
                     db.session.commit()
 
