@@ -562,7 +562,7 @@ def get_roofs():
                     if etype is not None:
                         mJson += '"empty":"' + str(etype.area) + '", "etype":"' + etype.name + '"},'
                     else:
-                        mJson += '},'
+                        mJson = mJson[:-1] + '},'
                 else:
                     mJson = mJson[:-1] + '},'
 
