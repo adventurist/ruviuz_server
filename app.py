@@ -457,20 +457,20 @@ def create_section():
             length = request.json.get('length')
             width = request.json.get('width')
             slope = request.json.get('slope')
-            empty = request.json.get('empty')
+            missing = request.json.get('missing')
             ruvfid = request.json.get('rid')
             full = True if request.json.get('full') == 1 else False
 
-            if length is None or width is None or slope is None or empty is None or ruvfid is None or full is None:
+            if length is None or width is None or slope is None or missing is None or ruvfid is None or full is None:
                 print 'Insufficient data to create new section'
                 return 'Insufficient data to create new section'
-            section = Section.query.filter_by(rid=ruvfid, length=length, width=width, empty=empty, full=full,
+            section = Section.query.filter_by(rid=ruvfid, length=length, width=width, empty=missing, full=full,
                                               slope=slope).first()
             if section is not None:
                 print ('Found the same section')
                 return jsonify({'Section': section.serialize()}), 202
             print ('Create new section')
-            new_section = Section(rid=ruvfid, length=length, width=width, empty=empty, full=full, slope=slope)
+            new_section = Section(rid=ruvfid, length=length, width=width, empty=missing, full=full, slope=slope)
             db.session.add(new_section)
             db.session.commit()
             if full == -1:
