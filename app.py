@@ -76,13 +76,9 @@ class Roof(db.Model):
     def serialize(self):
         return {
             'id': self.id,
-            'length': re.sub("[^0-9^.]", "", str(self.length)),
-            'width': re.sub("[^0-9^.]", "", str(self.width)),
-            'slope': re.sub("[^0-9^.]", "", str(self.slope)),
             'price': re.sub("[^0-9^.]", "", str(self.price)),
             'address_id': self.address_id,
             'customer_id': self.customer_id,
-            'address': self.address.encode("utf-8"),
         }
 
 
