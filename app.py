@@ -393,7 +393,7 @@ def add_roof():
         city = request.json.get('city')
         region = request.json.get('region')
         postal = request.json.get('postal')
-        slope = request.json.get('slope')
+        # slope = request.json.get('slope')
         price = request.json.get('price')
         firstname = request.json.get('firstName')
         lastname = request.json.get('lastName')
@@ -401,14 +401,14 @@ def add_roof():
         phone = request.json.get('phone')
         prefix = request.json.get('prefix')
 
-        if slope is None or address is None or price is None or firstname is None:
+        if address is None or city is None or price is None or firstname is None:
             print ('Something not set')
             abort(400)
-        if Roof.query.filter_by(address=address).first() is not None:
-            roof = Address(address=address)
-            print ('Found a roof')
-            if roof is not None:
-                print ('Found a roof at the following address: ')
+        # if Roof.query.filter_by(address=address).first() is not None:
+        #     roof = Address(address=address)
+        #     print ('Found a roof')
+        #     if roof is not None:
+            print ('Found a roof at the following address: ')
                 # print str(address.serialize())
                 # return jsonify({'Address': address.serialize()}), 200
         print ('Make new roof')
