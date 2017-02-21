@@ -633,9 +633,9 @@ def get_roofs():
             cQuery = Customer.query.filter_by(id=roof.customer_id)
             fQuery = RuvFile.query.filter_by(rid=roof.id, status=1)
             sQuery = Section.query.filter_by(rid=roof.id)
-            # aResult = Address.query.filter_by(id=roof.address_id).one_or_none()
-            # if aResult is not None:
-            #     mJson += '"address":"' + aResult.serialize() + '",'
+            aResult = Address.query.filter_by(id=roof.address_id).one_or_none()
+            if aResult is not None:
+                mJson += '"address":"' + aResult.serialize() + '",'
 
             if cQuery.count() > 0:
                 cResult = cQuery.first()
