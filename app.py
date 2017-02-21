@@ -635,7 +635,7 @@ def get_roofs():
             sQuery = Section.query.filter_by(rid=roof.id)
             aResult = Address.query.filter_by(id=roof.address_id).one_or_none()
             if aResult is not None:
-                mJson += ',"address":"' + str(aResult.serialize()) + '",'
+                mJson += ',"address":"' + str(aResult.serialize()).replace("'", '"') + '",'
 
             if cQuery.count() > 0:
                 cResult = cQuery.first()
