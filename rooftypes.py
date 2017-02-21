@@ -1,4 +1,7 @@
 class Roof_types:
+    def __init__(self):
+        pass
+
     Standard = 1
     Premium = 2
     Aluminum = 3

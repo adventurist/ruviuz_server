@@ -2,7 +2,7 @@ from flask import Flask, abort, jsonify, url_for, render_template, g, request, s
 from flask.json import JSONEncoder
 from flask_sqlalchemy import SQLAlchemy
 from flask_httpauth import HTTPBasicAuth
-import decimal, re, os, json, datetime
+import decimal, re, os, json, datetime, rooftypes
 from passlib.apps import custom_app_context as pwd_context
 from itsdangerous import (TimedJSONWebSignatureSerializer as Serializer, BadSignature, SignatureExpired)
 from werkzeug.utils import secure_filename
@@ -28,7 +28,6 @@ class MJSONEncoder(JSONEncoder):
         if isinstance(obj, decimal.Decimal):
             return str(obj)
         return super(MJSONEncoder, self).default(obj)
-
 
 app.json_encoder = MJSONEncoder
 
@@ -69,11 +68,7 @@ class User(db.Model):
 class Roof(db.Model):
     __tablename__ = "roofs"
     id = db.Column(db.Integer, primary_key=True)
-    length = db.Column(db.DECIMAL(10, 3))
-    width = db.Column(db.DECIMAL(10, 3))
-    slope = db.Column(db.Float)
     price = db.Column(db.DECIMAL(10, 2))
-    address = db.Column(db.VARCHAR(255))
     address_id = db.Column(db.Integer)
     customer_id = db.Column(db.Integer)
     sections = db.relationship('Section', backref='roof', cascade='all, delete-orphan', lazy='dynamic')
@@ -91,15 +86,57 @@ class Roof(db.Model):
         }
 
 
+class RoofTypes(db.Model):
+    __tablename__ = "rooftype"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.VARCHAR(64))
+    price = db.Column(db.Integer)
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'name': self.name.encode("utf-8"),
+            'price': re.sub("[^0-9^.]", "", str(self.price)),
+        }
+
+    @staticmethod
+    def update_price():
+        temptypes = {'Standard': 10, 'Premium': 20, 'Aluminum': 32, 'Standing Seam': 25, 'PVC 50': 22, 'EPDM': 18, 'Tar Gravel BUR': 15, 'TPO 45': 19}
+        print (temptypes)
+        print ('Update Price called')
+        for rtype, value in temptypes.iteritems():
+            print (rtype)
+            rooftype = RoofTypes.query.filter_by(name=rtype).one_or_none()
+            if rooftype is not None:
+                print ('Rooftype found: updating')
+                rooftype.price = value
+                db.session.commit()
+            else:
+                print ('Creating new rooftype')
+                rooftype = RoofTypes(name=rtype, price=value)
+                try:
+                    db.session.add(rooftype)
+                    db.session.commit()
+                    print (rooftype.serialize())
+                    # return rooftype.serialize()
+                except Exception as e:
+                    db.session.rollback()
+                    db.session.remove()
+                    print ('Unable to commit new RoofType')
+                    return 'Unable to commit new RoofType'
+
+
 class Section(db.Model):
     __tablename__ = "section"
     id = db.Column(db.Integer, primary_key=True)
     length = db.Column(db.DECIMAL(10, 3))
     width = db.Column(db.DECIMAL(10, 3))
+    twidth = db.Column(db.DECIMAL(10, 3))
     full = db.Column(db.Boolean)
     empty = db.Column(db.DECIMAL(10, 3))
     slope = db.Column(db.Float)
     rid = db.Column(db.Integer, db.ForeignKey('roofs.id'))
+    sectiontype = db.relationship('SectionType', backref='section', cascade='all, delete-orphan', uselist=False, lazy='dynamic')
     emptytype = db.relationship('EmptyType', backref='section', cascade='all, delete-orphan', lazy='dynamic')
 
     def serialize(self):
@@ -110,6 +147,56 @@ class Section(db.Model):
             'slope': re.sub("[^0-9^.]", "", str(self.slope)),
             'empty': re.sub("[^0-9^.]", "", str(self.empty)),
             'full': self.full,
+        }
+
+
+class SectionTypes(db.Model):
+    __tablename__ = "sectiontypes"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.VARCHAR(64))
+    sectiontype = db.relationship('SectionType', backref='sectiontypes', cascade='all, delete-orphan', uselist=False, lazy='dynamic')
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'name': self.name.encode("utf-8"),
+        }
+
+    @staticmethod
+    def update_price():
+        temptypes = ['Hip:Square', 'Hip:Rectangular', 'Gable', 'Mansard', 'Lean-to-Roof']
+        print (temptypes)
+        print ('Update Types called')
+        for value in temptypes:
+            print (value)
+            sectiontype = SectionTypes.query.filter_by(name=value).one_or_none()
+            if sectiontype is not None:
+                print ('Already in database')
+            else:
+                print ('Creating new section type')
+                sectiontype = SectionTypes(name=value)
+                try:
+                    db.session.add(sectiontype)
+                    db.session.commit()
+                    print (sectiontype.serialize())
+                    # return rooftype.serialize()
+                except Exception as e:
+                    db.session.rollback()
+                    db.session.remove()
+                    print ('Unable to commit new SectionType')
+                    return 'Unable to commit new SectionType'
+
+
+class SectionType(db.Model):
+    __tablename__ = "sectiontype"
+    __tableargs__ = (db.UniqueConstraint('sid', 'tid'),)
+    id = db.Column(db.Integer, primary_key=True)
+    sid = db.Column(db.Integer, db.ForeignKey('section.id'))
+    tid = db.Column(db.Integer, db.ForeignKey('sectiontypes.id'))
+
+    def serialize(self):
+        return {
+            'id': self.id,
         }
 
 
@@ -209,6 +296,11 @@ class Customer(db.Model):
             'email': self.email.encode("utf-8"),
             'referred_by': self.referred_by,
         }
+
+
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db.session.remove()
 
 
 @auth.verify_password
@@ -655,13 +747,26 @@ def static_file(path):
     return send_from_directory('ruv_uploads', path)
 
 
-@app.route('/calculate/<int:ruvid>', methods=['GET', 'POST'])
+@app.route('/calculate/<int:rid>', methods=['GET', 'POST'])
 @auth.login_required
-def get_estimate(ruvid):
-    calculator = Calculator(ruvid)
+def get_estimate(rid):
+    calculator = Calculator(rid)
     sections = calculator.get_sections()
-    total_area = calculator.calculate
-    price_estimate = calculator.get_estimate(total_area, Calculator.roof_types.Aluminum)
+    # print (sections)
+    total_area = calculator.calculate(sections)
+    price_estimate = calculator.get_estimate(total_area, calculator.roof_types.PVC_50)
+    return jsonify({'Result': 200, 'Price': price_estimate})
+
+
+@app.route('/rooftypes/price/update', methods=['GET', 'POST'])
+@auth.login_required
+def update_rooftype_prices():
+    try:
+        print ('Trying to update price')
+        RoofTypes.update_price()
+        return jsonify({'Rooftypes': 204, 'Price': 'Updated'})
+    except Exception:
+        return jsonify({'Rooftypes': 500, 'Price': 'Update failed'})
 
 
 if __name__ == '__main__':

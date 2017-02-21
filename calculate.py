@@ -1,22 +1,25 @@
 from rooftypes import Roof_types
+import decimal
+from decimal import ROUND_HALF_UP
 
 
 class Calculator:
-    ruvid = None
+    rid = None
     roof_types = None
 
-    def __init__(self, ruvid):
-        self.ruvid = ruvid
+    def __init__(self, rid):
+        self.rid = rid
         self.roof_types = Roof_types
 
-    @property
+    @staticmethod
     def calculate(*args):
         from app import Section
         total_area = 0
         i = 0
-
-        for key in args:
+        print (args)
+        for key in args[0]:
             print key
+            print '\n'
 
             if isinstance(key, Section):
 
@@ -30,7 +33,7 @@ class Calculator:
                     total_area += this_section
 
                 else:
-                    this_section = length * angle - m_section.empty
+                    this_section = decimal.Decimal(length) * decimal.Decimal(decimal.Decimal(angle) - m_section.empty)
                     total_area += this_section
 
                 print "This section: " + str(this_section)
@@ -38,12 +41,13 @@ class Calculator:
 
                 i += 1
 
-        print total_area
+        # print total_area
         return total_area
 
     def get_sections(self):
         from app import Section
-        sections = Section.query.filter_by(ruvid=self.ruvid).all()
+        sections = Section.query.filter_by(rid=self.rid).all()
+        # print (sections)
         if sections is None:
             return 'Error'
         else:
@@ -51,17 +55,20 @@ class Calculator:
 
     @staticmethod
     def get_estimate(area, type):
-        print area
-        print type
+        # print area
+        # print type
         for key, value in Roof_types.__dict__.items():
-            print value
+            # print value
             if type == value:
-                print 'Found match!'
-                cost = area * (0.325 * value)
-                return cost
+                # print 'Found match!'
+                cost = area * decimal.Decimal(0.325 * value)
+                # print (area)
+                # print (value)
+                # print (cost)
+                return cost.quantize(decimal.Decimal(".01"), rounding=ROUND_HALF_UP)
 
 # if __name__ == '__main__':
-#
+#     from app import Section
 #     Calculator.debug = True
 #
 #     roof_id = 44
@@ -73,7 +80,8 @@ class Calculator:
 #     section6 = Section(length=15, width=8, full=0, empty=60, slope=35)
 #
 #     section_list = [section1, section2, section4, section5, section6]
-#     area = Calculator(roof_id).calculate
+#     area = Calculator(roof_id).calculate(section_list)
+#     print (area)
 #     rtype = Roof_types.PVC_50
 #
 #     estimate = Calculator(roof_id).get_estimate(area, rtype)
