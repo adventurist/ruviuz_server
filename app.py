@@ -434,7 +434,7 @@ def add_roof():
                 return jsonify({'AddressIssue': 'Fail', 'ErrorDetails': 'Unable to create new address in database'})
 
         if newaddress is not None and newcustomer is not None:
-            roof = Roof(address=address, slope=slope, price=price, address_id=newaddress.id,
+            roof = Roof(address=address, price=price, address_id=newaddress.id,
                         customer_id=newcustomer.id)
             db.session.add(roof)
             db.session.commit()
