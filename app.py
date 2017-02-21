@@ -650,9 +650,9 @@ def get_roofs():
                     print (section.serialize())
                     mJson += '{"slope":"' + str(section.slope) + '", "length":"' + str(section.length) + '", "width":"' + str(section.width) + '", "full":"' + str(section.full) + '",'
                     if section.full == 0:
-                        emptytype = section.emptytype.first()
-                        print (emptytype)
-                        etype = EmptyType.query.filter_by(sid=section.id).one_or_none()
+                        ename = section.emptytype.name
+                        print (ename)
+                        etype = section.emptytype.name
                         print (etype)
                         if etype is not None:
                             mJson += '"empty":"' + str(etype.area) + '", "etype":"' + etype.name + '"},'
