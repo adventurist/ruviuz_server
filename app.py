@@ -276,7 +276,7 @@ class Comment(db.Model):
 class Customer(db.Model):
     __tablename__ = "customer"
     id = db.Column(db.Integer, primary_key=True)
-    prefix = db.Column(db.VARCHAR(3))
+    prefix = db.Column(db.VARCHAR(4))
     first = db.Column(db.VARCHAR(96))
     last = db.Column(db.VARCHAR(96))
     married = db.Column(db.Boolean(96))
