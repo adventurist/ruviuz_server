@@ -624,6 +624,7 @@ def get_roofs():
     # TODO reorder roofs with newest first
     print 'Getting roofs'
     roofs = Roof.query.order_by(Roof.id.desc()).limit(20)
+    print (roofs.count())
     if roofs.count() == 0:
         return 'Error'
     else:
