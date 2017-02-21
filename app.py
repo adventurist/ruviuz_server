@@ -681,7 +681,7 @@ def get_roofs():
                 mJson = mJson[:-1]
                 mJson += ']'
             else:
-                mJson = mJson[:-1] + '}'
+                mJson = mJson[:-1] + ''
             mJson += '},'
             i += 1
         mJson = '{"Roofs":[' + str((mJson[:-1])) + ']}'
