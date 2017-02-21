@@ -136,8 +136,8 @@ class Section(db.Model):
     empty = db.Column(db.DECIMAL(10, 3))
     slope = db.Column(db.Float)
     rid = db.Column(db.Integer, db.ForeignKey('roofs.id'))
-    sectiontype = db.relationship('SectionType', backref='section', cascade='all, delete-orphan', uselist=False, lazy='dynamic')
-    emptytype = db.relationship('EmptyType', backref='section', cascade='all, delete-orphan', lazy='dynamic')
+    sectiontype = db.relationship('SectionType', backref='section', cascade='all, delete-orphan', uselist=False)
+    emptytype = db.relationship('EmptyType', backref='section', cascade='all, delete-orphan', uselist=False)
 
     def serialize(self):
         return {
@@ -154,7 +154,7 @@ class SectionTypes(db.Model):
     __tablename__ = "sectiontypes"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.VARCHAR(64))
-    sectiontype = db.relationship('SectionType', backref='sectiontypes', cascade='all, delete-orphan', uselist=False, lazy='dynamic')
+    sectiontype = db.relationship('SectionType', backref='sectiontypes', cascade='all, delete-orphan', uselist=False)
 
     def serialize(self):
         return {
