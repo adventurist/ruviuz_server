@@ -623,74 +623,76 @@ def create_comment():
 def get_roofs():
     # TODO reorder roofs with newest first
     print 'Getting roofs'
-    roofs = Roof.query.order_by(Roof.id.desc()).limit(20).all()
+    roofs = Roof.query.order_by(Roof.id.desc()).limit(20)
     if roofs.count() == 0:
         return 'Error'
-    mJson = ''
-    i = 0
-    for roof in roofs:
-        print (roof)
-        mJson += '{"roof":' + str(roof.serialize()).replace("'", '"')
-        cQuery = Customer.query.filter_by(id=roof.customer_id)
-        fQuery = RuvFile.query.filter_by(rid=roof.id, status=1)
-        sQuery = Section.query.filter_by(rid=roof.id)
-        # aResult = Address.query.filter_by(id=roof.address_id).one_or_none()
-        # if aResult is not None:
-        #     mJson += '"address":"' + aResult.serialize() + '",'
+    else:
+        roofs = roofs.all()
+        mJson = ''
+        i = 0
+        for roof in roofs:
+            print (roof)
+            mJson += '{"roof":' + str(roof.serialize()).replace("'", '"')
+            cQuery = Customer.query.filter_by(id=roof.customer_id)
+            fQuery = RuvFile.query.filter_by(rid=roof.id, status=1)
+            sQuery = Section.query.filter_by(rid=roof.id)
+            # aResult = Address.query.filter_by(id=roof.address_id).one_or_none()
+            # if aResult is not None:
+            #     mJson += '"address":"' + aResult.serialize() + '",'
 
-        if cQuery.count() > 0:
-            cResult = cQuery.first()
-            mJson = mJson[:-1]
-            mJson += ',"customer":"' + cResult.first + ' ' + cResult.last + '",'
-        if sQuery.count() > 0:
-            sResult = sQuery.all()
-            scount = 0
-            mJson = mJson[:-1]
-            mJson += ',"sections":['
-            for section in sResult:
-                print (section.serialize())
-                mJson += '{"slope":"' + str(section.slope) + '", "length":"' + str(section.length) + '", "width":"' + str(section.width) + '", "full":"' + str(section.full) + '",'
-                if section.full == 0:
-                    emptytype = section.emptytype.one_or_none()
-                    print (emptytype)
-                    etype = EmptyType.query.filter_by(sid=section.id).one_or_none()
-                    print (etype)
-                    if etype is not None:
-                        mJson += '"empty":"' + str(etype.area) + '", "etype":"' + etype.name + '"},'
+            if cQuery.count() > 0:
+                cResult = cQuery.first()
+                mJson = mJson[:-1]
+                mJson += ',"customer":"' + cResult.first + ' ' + cResult.last + '",'
+            if sQuery.count() > 0:
+                sResult = sQuery.all()
+                scount = 0
+                mJson = mJson[:-1]
+                mJson += ',"sections":['
+                for section in sResult:
+                    print (section.serialize())
+                    mJson += '{"slope":"' + str(section.slope) + '", "length":"' + str(section.length) + '", "width":"' + str(section.width) + '", "full":"' + str(section.full) + '",'
+                    if section.full == 0:
+                        emptytype = section.emptytype.one_or_none()
+                        print (emptytype)
+                        etype = EmptyType.query.filter_by(sid=section.id).one_or_none()
+                        print (etype)
+                        if etype is not None:
+                            mJson += '"empty":"' + str(etype.area) + '", "etype":"' + etype.name + '"},'
+                        else:
+                            mJson = mJson[:-1] + '},'
                     else:
                         mJson = mJson[:-1] + '},'
-                else:
-                    mJson = mJson[:-1] + '},'
 
-                scount += 1
-            mJson = mJson[:-1] + '],'
-        if fQuery.count() > 0:
-            fcount = 0
-            fileResult = fQuery.all()
-            mJson = mJson[:-1]
-            mJson += ',"files":['
-            for result in fileResult:
-                print result.serialize()
-                comment = Comment.query.filter_by(ruvfid=result.id, status=1).one_or_none()
-                print (comment)
-                mJson += '{"' + str(fcount) + '":"' + str(result.filename) + '"'
-                if comment is not None:
-                    mJson += ',"comment":"' + comment.body + '"},'
-                else:
-                    mJson += '},'
-                fcount += 1
-            mJson = mJson[:-1]
-            mJson += ']}'
-        else:
-            mJson = mJson[:-1] + '}'
-        mJson += '},'
-        i += 1
-    mJson = '{"Roofs":[' + str((mJson[:-1])) + ']}'
+                    scount += 1
+                mJson = mJson[:-1] + '],'
+            if fQuery.count() > 0:
+                fcount = 0
+                fileResult = fQuery.all()
+                mJson = mJson[:-1]
+                mJson += ',"files":['
+                for result in fileResult:
+                    print result.serialize()
+                    comment = Comment.query.filter_by(ruvfid=result.id, status=1).one_or_none()
+                    print (comment)
+                    mJson += '{"' + str(fcount) + '":"' + str(result.filename) + '"'
+                    if comment is not None:
+                        mJson += ',"comment":"' + comment.body + '"},'
+                    else:
+                        mJson += '},'
+                    fcount += 1
+                mJson = mJson[:-1]
+                mJson += ']}'
+            else:
+                mJson = mJson[:-1] + '}'
+            mJson += '},'
+            i += 1
+        mJson = '{"Roofs":[' + str((mJson[:-1])) + ']}'
 
-    if not roofs:
-        abort(400)
-    print str(mJson.replace('\\"', '"'))
-    return (mJson.replace('\\"', '"')), 201
+        if not roofs:
+            abort(400)
+        print str(mJson.replace('\\"', '"'))
+        return (mJson.replace('\\"', '"')), 201
 
 
 @app.route('/roof/update/<int:id>', methods=['POST'])
