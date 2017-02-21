@@ -622,10 +622,12 @@ def create_comment():
 @auth.login_required
 def get_roofs():
     # TODO reorder roofs with newest first
+    print 'Getting roofs'
     roofs = Roof.query.order_by(Roof.id.desc()).limit(20).all()
     mJson = ''
     i = 0
     for roof in roofs:
+        print (roof)
         mJson += '{"roof":' + str(roof.serialize()).replace("'", '"')
         cQuery = Customer.query.filter_by(id=roof.customer_id)
         fQuery = RuvFile.query.filter_by(rid=roof.id, status=1)
