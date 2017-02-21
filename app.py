@@ -679,7 +679,7 @@ def get_roofs():
                         mJson += '},'
                     fcount += 1
                 mJson = mJson[:-1]
-                mJson += ']}'
+                mJson += ']'
             else:
                 mJson = mJson[:-1] + '}'
             mJson += '},'
