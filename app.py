@@ -624,6 +624,8 @@ def get_roofs():
     # TODO reorder roofs with newest first
     print 'Getting roofs'
     roofs = Roof.query.order_by(Roof.id.desc()).limit(20).all()
+    if roofs.count() == 0:
+        return 'Error'
     mJson = ''
     i = 0
     for roof in roofs:
