@@ -652,7 +652,7 @@ def get_roofs():
                     if section.full == 0:
                         ename = section.emptytype.name
                         print (ename)
-                        etype = section.emptytype.name
+                        etype = section.emptytype
                         print (etype)
                         if etype is not None:
                             mJson += '"empty":"' + str(etype.area) + '", "etype":"' + etype.name + '"},'
