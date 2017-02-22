@@ -451,7 +451,7 @@ def add_roof():
             db.session.commit()
             rmat_id = rmaterial.id
         else:
-            rmat_id = rmaterial.id
+            rmat_id = rmaterial.first().id
 
         if newaddress is not None and newcustomer is not None:
             roof = Roof(price=price, address_id=newaddress.id,
