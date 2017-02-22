@@ -542,6 +542,7 @@ def create_section():
     if request.method == 'POST':
         if request.headers['Content-Type'] == 'application/json':
             print request.json
+            section_type = request.json.get('type')
             length = request.json.get('length')
             width = request.json.get('width')
             slope = request.json.get('slope')
@@ -570,7 +571,18 @@ def create_section():
                     print str(emptytype.serialize())
                     db.session.add(emptytype)
                     db.session.commit()
-
+            stype = SectionTypes.query.filter_by(name=section_type).one_or_none()
+            st_id = None
+            if stype is None:
+                sec_type = SectionTypes(name=section_type)
+                db.session.add(sec_type)
+                db.session.commit()
+                st_id = sec_type.id
+            else:
+                st_id = stype.id
+            section_this_type = SectionType(sid=section.id, tid=st_id)
+            db.session.add(section_this_type)
+            db.session.commit()
             print ('Created section ==> ' + str(new_section.serialize()))
             return jsonify({'Section': new_section.serialize()}), 201
 
