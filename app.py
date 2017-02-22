@@ -69,6 +69,7 @@ class Roof(db.Model):
     __tablename__ = "roofs"
     id = db.Column(db.Integer, primary_key=True)
     price = db.Column(db.DECIMAL(10, 2))
+    floors = db.Column(db.Integer)
     address_id = db.Column(db.Integer)
     customer_id = db.Column(db.Integer)
     sections = db.relationship('Section', backref='roof', cascade='all, delete-orphan', lazy='dynamic')
@@ -78,6 +79,7 @@ class Roof(db.Model):
         return {
             'id': self.id,
             'price': re.sub("[^0-9^.]", "", str(self.price)),
+            'floors': re.sub("[^0-9^.]", "", str(self.floors)),
             'address_id': self.address_id,
             'customer_id': self.customer_id,
         }
@@ -89,6 +91,7 @@ class RoofType(db.Model):
     name = db.Column(db.VARCHAR(64))
     price = db.Column(db.Integer)
     rooftype = db.relationship('Rtype', backref='RoofType', cascade='all, delete-orphan', uselist=False)
+
     def serialize(self):
         return {
             'id': self.id,
@@ -800,9 +803,11 @@ def get_estimate(rid):
     calculator = Calculator(rid)
     sections = calculator.get_sections()
     # print (sections)
-    total_area = calculator.calculate(sections)
-    price_estimate = calculator.get_estimate(total_area, calculator.roof_types.PVC_50)
-    return jsonify({'Result': 200, 'Price': price_estimate})
+    # total_area = calculator.calculate(sections)
+    total_area2 = calculator.calculate_price(sections)
+    # price_estimate = calculator.get_estimate(total_area, calculator.roof_types.PVC_50)
+    price_estimate = 100
+    return jsonify({'Result': 200, 'Price': price_estimate, 'DevResult': total_area2})
 
 
 @app.route('/RoofType/price/update', methods=['GET', 'POST'])

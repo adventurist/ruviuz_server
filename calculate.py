@@ -13,9 +13,10 @@ class Calculator:
 
     @staticmethod
     def calculate(*args):
-        from app import Section
+        from app import Roof, RoofType, Section, Rtype
         total_area = 0
         i = 0
+
         print (args)
         for key in args[0]:
             print key
@@ -23,17 +24,32 @@ class Calculator:
 
             if isinstance(key, Section):
 
+                # twidth = db.Column(db.DECIMAL(10, 3))
+                # full = db.Column(db.Boolean)
+                # empty = db.Column(db.DECIMAL(10, 3))
+                # slope = db.Column(db.Float)
+                # rid = db.Column(db.Integer, db.ForeignKey('roofs.id'))
+                # sectiontype = db.relationship('SectionType', backref='section', cascade='all, delete-orphan',
+                #                               uselist=False)
+                # emptytype = db.relationship('EmptyType', backref='section', cascade='all, delete-orphan', uselist=False)
+
                 m_section = key
                 length = m_section.length
                 width = m_section.width
                 angle = m_section.slope
+                full = m_section.full
+                twidth = None
+                # if not full:
+                #     twidth = m_section.twidth
+                #     empty_area = m_section.empty
+                #     empty_type = m_section.emptytype
 
                 if m_section.full > 0:
-                    this_section = length * angle
+                    this_section = length * width
                     total_area += this_section
 
                 else:
-                    this_section = decimal.Decimal(length) * decimal.Decimal(decimal.Decimal(angle) - m_section.empty)
+                    this_section = decimal.Decimal(length) * decimal.Decimal(decimal.Decimal(width) - m_section.empty)
                     total_area += this_section
 
                 print "This section: " + str(this_section)
@@ -43,6 +59,91 @@ class Calculator:
 
         # print total_area
         return total_area
+
+    def calculate_price(self, *args):
+        from app import Roof, RoofType, Section, Rtype
+        # section_type, mat_type, empt_type, area, empt_area, empt_num, floors, clean_factor, pitch = None
+        # floors_factor = 0 if floors == 1 else 0.05
+        # roof_price = mat_type * (area - empt_area) * empt_num * clean_factor * (1 + (floors * floors_factor)) * pitch
+        roof = Roof.query.filter_by(id=self.rid).one_or_none()
+        r_type = Rtype.query.filter_by(rid=self.rid).one_or_none()
+        print 'Rtype:'
+        print (r_type.serialize())
+        print 'Floors:'
+        print roof.floors
+        mat_type = RoofType.query.filter_by(id=self.rid).one_or_none()
+        mat_type2 = RoofType.query.filter_by(id=r_type.id).one_or_none()
+        print 'mat type:'
+        print (mat_type.name)
+
+        print 'mat type2:'
+        print (mat_type2.name)
+
+
+        # roof = Roof.query.filter_by(id=self.rid).one_or_none()
+        # print (roof.serialize())
+        # rooftype = RoofType.query.filter_by(id=r_type.tid).one_or_none()
+        # print (rooftype.serialize())
+        #
+        #
+        pitch = None
+        enum = 0
+        total_area = 0
+        i = 0
+        # print (args)
+        for key in args[0]:
+            # print key
+            # print '\n'
+
+            if isinstance(key, Section):
+
+                # twidth = db.Column(db.DECIMAL(10, 3))
+                # full = db.Column(db.Boolean)
+                # empty = db.Column(db.DECIMAL(10, 3))
+                # slope = db.Column(db.Float)
+                # rid = db.Column(db.Integer, db.ForeignKey('roofs.id'))
+                # sectiontype = db.relationship('SectionType', backref='section', cascade='all, delete-orphan',
+                #                               uselist=False)
+                # emptytype = db.relationship('EmptyType', backref='section', cascade='all, delete-orphan', uselist=False)
+
+                m_section = key
+                length = m_section.length
+                width = m_section.width
+                angle = m_section.slope
+                full = m_section.full
+                twidth = m_section.twidth
+                pitch = m_section.slope/1000 + 1
+                if not full:
+                    empty_area = m_section.empty
+                    empty_type = m_section.emptytype
+                    enum += 1
+
+                # rooftype = RoofType.query.filter_by(id=Rtype.query.filter_by(rid=self.rid).one_or_none()).one_or_none()
+                # if rooftype is not None:
+                #     print 'Rooftype:'
+                #     print (rooftype)
+
+                if m_section.full > 0:
+                    this_section = length * width
+                    total_area += this_section
+
+                else:
+                    this_section = decimal.Decimal(length) * decimal.Decimal(decimal.Decimal(angle) - m_section.empty)
+                    total_area += this_section
+
+                # print "This section: " + str(this_section)
+                # print str(i) + ': ' + str(total_area)
+
+                i += 1
+
+        floors = roof.floors
+        floors_factor = 0 if floors == 1 else 0.05
+        clean_factor = 1.0625
+
+        roof_price = mat_type.price * total_area * enum * decimal.Decimal(clean_factor) * (1 + (floors * floors_factor)) * decimal.Decimal(pitch)
+        final_price = roof_price.quantize(decimal.Decimal(".01"), rounding=ROUND_HALF_UP)
+        print final_price
+        return final_price
 
     def get_sections(self):
         from app import Section
