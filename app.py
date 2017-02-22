@@ -549,6 +549,7 @@ def create_section():
             missing = request.json.get('missing')
             ruvfid = request.json.get('rid')
             full = True if request.json.get('full') == 1 else False
+            print (request.json.get('full'))
 
             if length is None or width is None or slope is None or missing is None or ruvfid is None or full is None:
                 print 'Insufficient data to create new section'
@@ -564,7 +565,7 @@ def create_section():
             db.session.commit()
             if not full:
                 print ('Saving Empty Type')
-                etype = request.json.get("etype")
+                etype = request.json.get('etype')
                 print (etype)
                 if etype is not None:
                     emptytype = EmptyType(sid=new_section.id, name=etype, area=missing)
