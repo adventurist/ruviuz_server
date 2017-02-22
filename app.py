@@ -72,6 +72,7 @@ class Roof(db.Model):
     address_id = db.Column(db.Integer)
     customer_id = db.Column(db.Integer)
     sections = db.relationship('Section', backref='roof', cascade='all, delete-orphan', lazy='dynamic')
+    rooftype = db.relationship('Rtype', backref='roof', cascade='all, delete-orphan', uselist=False)
 
     def serialize(self):
         return {
@@ -87,7 +88,7 @@ class RoofTypes(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.VARCHAR(64))
     price = db.Column(db.Integer)
-
+    rooftype = db.relationship('Rtype', backref='rooftypes', cascade='all, delete-orphan', uselist=False)
     def serialize(self):
         return {
             'id': self.id,
@@ -120,6 +121,19 @@ class RoofTypes(db.Model):
                     db.session.remove()
                     print ('Unable to commit new RoofType')
                     return 'Unable to commit new RoofType'
+
+
+class Rtype(db.Model):
+    __tablename__ = "rtype"
+    __tableargs__ = (db.UniqueConstraint('rid', 'tid'),)
+    id = db.Column(db.Integer, primary_key=True)
+    rid = db.Column(db.Integer, db.ForeignKey('roofs.id'))
+    tid = db.Column(db.Integer, db.ForeignKey('rooftypes.id'))
+
+    def serialize(self):
+        return {
+            'id': self.id,
+        }
 
 
 class Section(db.Model):
@@ -389,7 +403,7 @@ def add_roof():
         city = request.json.get('city')
         region = request.json.get('region')
         postal = request.json.get('postal')
-        # slope = request.json.get('slope')
+        material = request.json.get('material')
         price = request.json.get('price')
         firstname = request.json.get('firstName')
         lastname = request.json.get('lastName')
@@ -397,7 +411,7 @@ def add_roof():
         phone = request.json.get('phone')
         prefix = request.json.get('prefix')
 
-        if address is None or city is None or price is None or firstname is None:
+        if address is None or city is None or price is None or firstname is None or material is None:
             print ('Something not set')
             abort(400)
         # if Roof.query.filter_by(address=address).first() is not None:
@@ -429,11 +443,27 @@ def add_roof():
                 print e.message
                 return jsonify({'AddressIssue': 'Fail', 'ErrorDetails': 'Unable to create new address in database'})
 
+        rmaterial = RoofTypes.query.filter_by(name=material)
+        rmat_id = None
+        if rmaterial is None:
+            rmaterial = RoofTypes(name=material)
+            db.session.add(rmaterial)
+            db.session.commit()
+            rmat_id = rmaterial.id
+        else:
+            rmat_id = rmaterial.id
+
         if newaddress is not None and newcustomer is not None:
             roof = Roof(price=price, address_id=newaddress.id,
                         customer_id=newcustomer.id)
             db.session.add(roof)
             db.session.commit()
+
+            roofmaterial = Rtype(rid=roof.id, tid=rmat_id)
+
+            db.session.add(roofmaterial)
+            db.session.commit()
+
             print ('Created roof==> ' + str(roof.serialize()))
             return jsonify({'Roof': roof.serialize()}), 201, {
                 'Location': url_for('get_roof', id=roof.id, _external=True)}
