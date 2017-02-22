@@ -580,7 +580,7 @@ def create_section():
                 st_id = sec_type.id
             else:
                 st_id = stype.id
-            section_this_type = SectionType(sid=section.id, tid=st_id)
+            section_this_type = SectionType(sid=new_section.id, tid=st_id)
             db.session.add(section_this_type)
             db.session.commit()
             print ('Created section ==> ' + str(new_section.serialize()))
