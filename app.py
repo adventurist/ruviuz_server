@@ -2,7 +2,7 @@ from flask import Flask, abort, jsonify, url_for, render_template, g, request, s
 from flask.json import JSONEncoder
 from flask_sqlalchemy import SQLAlchemy
 from flask_httpauth import HTTPBasicAuth
-import decimal, re, os, json, datetime, rooftypes
+import decimal, re, os, json, datetime
 from passlib.apps import custom_app_context as pwd_context
 from itsdangerous import (TimedJSONWebSignatureSerializer as Serializer, BadSignature, SignatureExpired)
 from werkzeug.utils import secure_filename
@@ -83,12 +83,12 @@ class Roof(db.Model):
         }
 
 
-class RoofTypes(db.Model):
+class RoofType(db.Model):
     __tablename__ = "rooftype"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.VARCHAR(64))
     price = db.Column(db.Integer)
-    rooftype = db.relationship('Rtype', backref='rooftypes', cascade='all, delete-orphan', uselist=False)
+    rooftype = db.relationship('Rtype', backref='RoofType', cascade='all, delete-orphan', uselist=False)
     def serialize(self):
         return {
             'id': self.id,
@@ -103,14 +103,14 @@ class RoofTypes(db.Model):
         print ('Update Price called')
         for rtype, value in temptypes.iteritems():
             print (rtype)
-            rooftype = RoofTypes.query.filter_by(name=rtype).one_or_none()
+            rooftype = RoofType.query.filter_by(name=rtype).one_or_none()
             if rooftype is not None:
                 print ('Rooftype found: updating')
                 rooftype.price = value
                 db.session.commit()
             else:
                 print ('Creating new rooftype')
-                rooftype = RoofTypes(name=rtype, price=value)
+                rooftype = RoofType(name=rtype, price=value)
                 try:
                     db.session.add(rooftype)
                     db.session.commit()
@@ -128,7 +128,7 @@ class Rtype(db.Model):
     __tableargs__ = (db.UniqueConstraint('rid', 'tid'),)
     id = db.Column(db.Integer, primary_key=True)
     rid = db.Column(db.Integer, db.ForeignKey('roofs.id'))
-    tid = db.Column(db.Integer, db.ForeignKey('rooftypes.id'))
+    tid = db.Column(db.Integer, db.ForeignKey('rooftype.id'))
 
     def serialize(self):
         return {
@@ -443,10 +443,10 @@ def add_roof():
                 print e.message
                 return jsonify({'AddressIssue': 'Fail', 'ErrorDetails': 'Unable to create new address in database'})
 
-        rmaterial = RoofTypes.query.filter_by(name=material)
+        rmaterial = RoofType.query.filter_by(name=material)
         rmat_id = None
         if rmaterial is None:
-            rmaterial = RoofTypes(name=material)
+            rmaterial = RoofType(name=material)
             db.session.add(rmaterial)
             db.session.commit()
             rmat_id = rmaterial.id
@@ -804,15 +804,15 @@ def get_estimate(rid):
     return jsonify({'Result': 200, 'Price': price_estimate})
 
 
-@app.route('/rooftypes/price/update', methods=['GET', 'POST'])
+@app.route('/RoofType/price/update', methods=['GET', 'POST'])
 @auth.login_required
 def update_rooftype_prices():
     try:
         print ('Trying to update price')
-        RoofTypes.update_price()
-        return jsonify({'Rooftypes': 204, 'Price': 'Updated'})
+        RoofType.update_price()
+        return jsonify({'RoofType': 204, 'Price': 'Updated'})
     except Exception:
-        return jsonify({'Rooftypes': 500, 'Price': 'Update failed'})
+        return jsonify({'RoofType': 500, 'Price': 'Update failed'})
 
 
 if __name__ == '__main__':
