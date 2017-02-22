@@ -443,7 +443,8 @@ def add_roof():
                 print e.message
                 return jsonify({'AddressIssue': 'Fail', 'ErrorDetails': 'Unable to create new address in database'})
 
-        rmaterial = RoofType.query.filter_by(name=material)
+        rmaterial = RoofType.query.filter_by(name=material).one_or_none()
+        print (rmaterial)
         rmat_id = None
         if rmaterial is None:
             rmaterial = RoofType(name=material)
@@ -451,7 +452,7 @@ def add_roof():
             db.session.commit()
             rmat_id = rmaterial.id
         else:
-            rmat_id = rmaterial.first().id
+            rmat_id = rmaterial.id
 
         if newaddress is not None and newcustomer is not None:
             roof = Roof(price=price, address_id=newaddress.id,
