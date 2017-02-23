@@ -87,7 +87,7 @@ class Calculator:
                 twidth = m_section.twidth
                 pitch = m_section.slope/1000 + 1
                 print str(m_section.full)
-                if m_section.full > 0:
+                if m_section.full:
                     this_section = length * width
                     total_area += this_section
 
@@ -101,11 +101,12 @@ class Calculator:
                 floors = roof.floors if roof.floors is not None else 1
                 floors_factor = 0 if floors == 1 else 0.05
                 clean_factor = 1.0625
+                empty_factor = 0.0375 * (1 + enum)
 
                 print 'Mat:type.price' + str(mat_type.price) + '\nEnum:' + str(enum) + '\nCleanfactor:' + str(clean_factor) + '\nPitch:' + str(pitch) + '\nTotalArea:' + str(total_area) + '\nfloors_factor:' + str(floors_factor)
-                roof_price = mat_type.price * total_area * enum * decimal.Decimal(clean_factor) * (1 + (floors + floors_factor)) * decimal.Decimal(pitch)
+                roof_price = mat_type.price * total_area * decimal.Decimal(empty_factor) * decimal.Decimal(clean_factor) * (1 + (floors + floors_factor)) * decimal.Decimal(pitch)
                 print 'Mat:type' + str(mat_type) + '\nEnum:' + str(enum) + '\nCleanfactor:' + str(clean_factor) + '\nPitch:' + str(pitch) + '\nTotalArea:' + str(total_area) + '\nfloors_factor:' + str(floors_factor)
-                print str(mat_type.price) + ' * ' + str(total_area.quantize(decimal.Decimal(".01"))) + ' * ' + str(enum) + ' * ' + str(decimal.Decimal(clean_factor)) + ' * (' + str(1) + ' * (' + str(floors) + ' * ' + str(floors_factor) + ')) * ' + str(decimal.Decimal(pitch).quantize(decimal.Decimal(".01")))
+                print str(mat_type.price) + ' * ' + str(total_area.quantize(decimal.Decimal(".01"))) + ' * ' + str(empty_factor.quantize(decimal.Decimal(".01"))) + ' * ' + str(decimal.Decimal(clean_factor)) + ' * (' + str(1) + ' * (' + str(floors) + ' + ' + str(floors_factor) + ')) * ' + str(decimal.Decimal(pitch).quantize(decimal.Decimal(".01")))
                 final_price = roof_price.quantize(decimal.Decimal(".01"), rounding=ROUND_HALF_UP)
                 print final_price
                 return final_price
