@@ -103,6 +103,7 @@ class Calculator:
                 clean_factor = 1.0625
 
                 roof_price = mat_type.price * total_area * enum * decimal.Decimal(clean_factor) * (1 + (floors * floors_factor)) * decimal.Decimal(pitch)
+                print 'Mat:type' + str(mat_type) + '\nEnum:' + str(enum) + '\nCleanfactor:' + str(clean_factor) + '\nPitch:' + pitch + '\nTotalArea:' + str(total_area) + '\nfloors_factor:' + str(floors_factor)
                 print str(mat_type.price) + ' * ' + str(total_area.quantize(decimal.Decimal(".01"))) + ' * ' + str(enum) + ' * ' + str(decimal.Decimal(clean_factor)) + ' * (' + str(1) + ' * (' + str(floors) + ' * ' + str(floors_factor) + ')) * ' + str(decimal.Decimal(pitch).quantize(decimal.Decimal(".01")))
                 final_price = roof_price.quantize(decimal.Decimal(".01"), rounding=ROUND_HALF_UP)
                 print final_price
