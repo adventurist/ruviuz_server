@@ -98,15 +98,15 @@ class Calculator:
 
                 i += 1
 
-        floors = roof.floors
-        floors_factor = 0 if floors == 1 else 0.05
-        clean_factor = 1.0625
+                floors = roof.floors
+                floors_factor = 0 if floors == 1 else 0.05
+                clean_factor = 1.0625
 
-        roof_price = mat_type.price * total_area * enum * decimal.Decimal(clean_factor) * (1 + (floors * floors_factor)) * decimal.Decimal(pitch)
-        print str(mat_type.price) + ' * ' + str(total_area.quantize(decimal.Decimal(".01"))) + ' * ' + str(enum) + ' * ' + str(decimal.Decimal(clean_factor)) + ' * (' + str(1) + ' * (' + str(floors) + ' * ' + str(floors_factor) + ')) * ' + str(decimal.Decimal(pitch).quantize(decimal.Decimal(".01")))
-        final_price = roof_price.quantize(decimal.Decimal(".01"), rounding=ROUND_HALF_UP)
-        print final_price
-        return final_price
+                roof_price = mat_type.price * total_area * enum * decimal.Decimal(clean_factor) * (1 + (floors * floors_factor)) * decimal.Decimal(pitch)
+                print str(mat_type.price) + ' * ' + str(total_area.quantize(decimal.Decimal(".01"))) + ' * ' + str(enum) + ' * ' + str(decimal.Decimal(clean_factor)) + ' * (' + str(1) + ' * (' + str(floors) + ' * ' + str(floors_factor) + ')) * ' + str(decimal.Decimal(pitch).quantize(decimal.Decimal(".01")))
+                final_price = roof_price.quantize(decimal.Decimal(".01"), rounding=ROUND_HALF_UP)
+                print final_price
+                return final_price
 
     def get_sections(self):
         from app import Section
