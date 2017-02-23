@@ -98,11 +98,11 @@ class Calculator:
 
                 i += 1
 
-                floors = roof.floors
+                floors = roof.floors if roof.floors is not None else 1
                 floors_factor = 0 if floors == 1 else 0.05
                 clean_factor = 1.0625
 
-                print 'Mat:type' + str(mat_type) + '\nEnum:' + str(enum) + '\nCleanfactor:' + str(clean_factor) + '\nPitch:' + str(pitch) + '\nTotalArea:' + str(total_area) + '\nfloors_factor:' + str(floors_factor)
+                print 'Mat:type.price' + str(mat_type.price) + '\nEnum:' + str(enum) + '\nCleanfactor:' + str(clean_factor) + '\nPitch:' + str(pitch) + '\nTotalArea:' + str(total_area) + '\nfloors_factor:' + str(floors_factor)
                 roof_price = mat_type.price * total_area * enum * decimal.Decimal(clean_factor) * (1 + (floors * floors_factor)) * decimal.Decimal(pitch)
                 print 'Mat:type' + str(mat_type) + '\nEnum:' + str(enum) + '\nCleanfactor:' + str(clean_factor) + '\nPitch:' + pitch + '\nTotalArea:' + str(total_area) + '\nfloors_factor:' + str(floors_factor)
                 print str(mat_type.price) + ' * ' + str(total_area.quantize(decimal.Decimal(".01"))) + ' * ' + str(enum) + ' * ' + str(decimal.Decimal(clean_factor)) + ' * (' + str(1) + ' * (' + str(floors) + ' * ' + str(floors_factor) + ')) * ' + str(decimal.Decimal(pitch).quantize(decimal.Decimal(".01")))
