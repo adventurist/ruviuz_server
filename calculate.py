@@ -67,7 +67,7 @@ class Calculator:
         # roof_price = mat_type * (area - empt_area) * empt_num * clean_factor * (1 + (floors * floors_factor)) * pitch
         roof = Roof.query.filter_by(id=self.rid).one_or_none()
         r_type = Rtype.query.filter_by(rid=self.rid).one_or_none()
-        mat_type = RoofType.query.filter_by(id=self.rid).one_or_none()
+        mat_type = RoofType.query.filter_by(id=r_type.tid).one_or_none()
 
         pitch = None
         enum = 0
