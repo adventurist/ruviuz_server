@@ -804,10 +804,19 @@ def get_estimate(rid):
     sections = calculator.get_sections()
     # print (sections)
     # total_area = calculator.calculate(sections)
-    total_area2 = calculator.calculate_price(sections)
+    estimated_price = calculator.calculate_price(sections)
     # price_estimate = calculator.get_estimate(total_area, calculator.roof_types.PVC_50)
     price_estimate = 100
-    return jsonify({'Result': 200, 'Price': price_estimate, 'DevResult': total_area2})
+    try:
+        roof_update = Roof.query.filter_by(id=rid).one_or_none()
+        if roof_update is not None:
+            roof_update.price = estimated_price
+            db.session.commit()
+            print (roof_update.serialize())
+    except Exception:
+        print Exception.message
+        return jsonify({'Error': str(Exception.message)})
+    return jsonify({'Result': 200, 'Price': price_estimate, 'DevResult': estimated_price})
 
 
 @app.route('/RoofType/price/update', methods=['GET', 'POST'])
