@@ -86,7 +86,7 @@ class Calculator:
                 full = m_section.full
                 twidth = m_section.twidth
                 pitch = m_section.slope/1000 + 1
-
+                print str(m_section.full)
                 if m_section.full > 0:
                     this_section = length * width
                     total_area += this_section
