@@ -85,11 +85,17 @@ class Calculator:
                 angle = m_section.slope
                 full = m_section.full
                 twidth = m_section.twidth
-                rtype = m_section.sectiontype.tid
-                print(rtype)
-                section_type = SectionTypes.query.filter_by(id=rtype).one_or_none()
-                print (rtype)
+                section_type = SectionTypes.query.filter_by(id=m_section.sectiontype.tid).one_or_none()
                 print (section_type.name)
+                # Gable
+                # Hip:Square
+                # Mansard
+                # Hip:Rectangular
+                # Lean - to - Roof
+
+                formulae = ({'Hip:Square': 1, 'Hip:Rectangular': 2, 'Gable': 3, 'Mansard': 4, 'Lean-to-Roof': 5})
+                if section_type.name == "Mansard":
+                    print 'We have mansard'
                 pitch = m_section.slope/1000 + 1
 
                 print str(m_section.full)
