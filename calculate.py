@@ -61,7 +61,7 @@ class Calculator:
         return total_area
 
     def calculate_price(self, *args):
-        from app import Roof, RoofType, Section, Rtype
+        from app import Roof, RoofType, Section, Rtype, SectionType, SectionTypes
         # section_type, mat_type, empt_type, area, empt_area, empt_num, floors, clean_factor, pitch = None
         # floors_factor = 0 if floors == 1 else 0.05
         # roof_price = mat_type * (area - empt_area) * empt_num * clean_factor * (1 + (floors * floors_factor)) * pitch
@@ -85,8 +85,11 @@ class Calculator:
                 angle = m_section.slope
                 full = m_section.full
                 twidth = m_section.twidth
-                rtype = m_section.sectiontype
+                rtype = m_section.sectiontype.tid
                 print(rtype)
+                section_type = SectionTypes.query.filter_by(id=rtype).one_or_none()
+                print (rtype)
+                print (section_type)
                 pitch = m_section.slope/1000 + 1
 
                 print str(m_section.full)
