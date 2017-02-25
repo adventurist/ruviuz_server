@@ -89,7 +89,7 @@ class Calculator:
                 print(rtype)
                 section_type = SectionTypes.query.filter_by(id=rtype).one_or_none()
                 print (rtype)
-                print (section_type)
+                print (section_type.name)
                 pitch = m_section.slope/1000 + 1
 
                 print str(m_section.full)
