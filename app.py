@@ -515,7 +515,7 @@ def get_roof(id):
     return jsonify({'Roof': roof.serialize(), 'Files': fstr, 'Customers': cstr, 'Address': astr})
 
 
-@app.route('/token')
+@app.route('/token', methods=['GET'])
 @auth.login_required
 def get_auth_token():
     print request
@@ -804,11 +804,8 @@ def static_file(path):
 def get_estimate(rid):
     calculator = Calculator(rid)
     sections = calculator.get_sections()
-    # print (sections)
-    # total_area = calculator.calculate(sections)
-    estimated_price = calculator.calculate_price(sections)
-    # price_estimate = calculator.get_estimate(total_area, calculator.roof_types.PVC_50)
-    price_estimate = 100
+    estimated_price, total_area = calculator.calculate_price(sections)
+
     try:
         roof_update = Roof.query.filter_by(id=rid).one_or_none()
         if roof_update is not None:
@@ -818,7 +815,7 @@ def get_estimate(rid):
     except Exception:
         print Exception.message
         return jsonify({'Error': str(Exception.message)})
-    return jsonify({'Result': 200, 'Price': price_estimate, 'DevResult': estimated_price})
+    return jsonify({'Result': 200, 'Area': total_area, 'RoofPrice': estimated_price})
 
 
 @app.route('/RoofType/price/update', methods=['GET', 'POST'])
