@@ -530,7 +530,7 @@ def get_roof(id):
     print roof.serialize()
     if not roof:
         abort(400)
-    return jsonify({'Roof': roof.serialize(), 'Files': f_list, 'Customers': c_list, 'Address': a_dict, 'Sections': s_list})
+    return jsonify({'Roof': roof.serialize(), 'Files': f_list, 'Customers': c_list, 'Address': a_list, 'Sections': s_list})
 
 
 @app.route('/token', methods=['GET'])
