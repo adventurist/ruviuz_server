@@ -536,7 +536,7 @@ def get_roof(id):
     print fstr
     if not roof:
         abort(400)
-    return jsonify({'Roof': roof.serialize(), 'Files': fstr, 'Customers': cstr, 'Address': astr, 'Sections': sJson})
+    return jsonify({'Roof': roof.serialize(), 'Files': fstr.replace('\\"', '"'), 'Customers': cstr.replace('\\"', '"'), 'Address': astr.replace('\\"', '"'), 'Sections': sJson.replace('\\"', '"')})
 
 
 @app.route('/token', methods=['GET'])
