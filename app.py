@@ -492,8 +492,7 @@ def get_roof(id):
     raddresses = Address.query.filter_by(id=roof.address_id).all()
     sections = roof.sections.all()
 
-    s_dict = {}
-    scount = 0
+    s_list = []
 
     for section in sections:
         section_type = SectionTypes.query.filter_by(id=section.sectiontype.tid).one_or_none()
@@ -503,11 +502,8 @@ def get_roof(id):
             print (section.emptytype.serialize())
             s_row['empty'] = section.emptytype.serialize()
 
-        s_dict[scount] = s_row
-        scount += 1
+        s_list.append(s_row)
 
-    f_dict = {}
-    fcount = 0
     f_list = []
 
     for rfile in rfiles:
@@ -518,29 +514,23 @@ def get_roof(id):
             print comment
             f_row['comment'] = comment.serialize()
         f_list.append(f_row)
-        f_dict[fcount] = f_row
-        fcount += 1
 
-    c_dict = {}
-    ccount = 0
+    c_list = []
 
     for rcustomer in rcustomers:
         c_row = {'customer': rcustomer.serialize()}
-        c_dict[ccount] = c_row
-        ccount += 1
+        c_list.append(c_row)
 
-    a_dict = {}
-    acount = 0
+    a_list = []
 
     for address in raddresses:
         a_row = {'address': address.serialize()}
-        a_dict[acount] = a_row
-        acount += 1
+        a_list.append(a_row)
 
     print roof.serialize()
     if not roof:
         abort(400)
-    return jsonify({'Roof': roof.serialize(), 'Files': f_list, 'Customers': c_dict, 'Address': a_dict, 'Sections': s_dict})
+    return jsonify({'Roof': roof.serialize(), 'Files': f_list, 'Customers': c_list, 'Address': a_dict, 'Sections': s_list})
 
 
 @app.route('/token', methods=['GET'])
