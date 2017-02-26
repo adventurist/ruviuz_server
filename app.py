@@ -51,7 +51,6 @@ class User(db.Model):
 
     @staticmethod
     def verify_auth_token(token):
-        print ('48 - ' + token)
         s = Serializer(app.config['SECRET_KEY'])
         try:
             data = s.loads(token)
@@ -225,7 +224,7 @@ class EmptyType(db.Model):
         return {
             'id': self.id,
             'sid': self.sid,
-            'name': re.sub("[^0-9^.]", "", str(self.name)),
+            'name': self.name.encode("utf-8"),
             'area': re.sub("[^0-9^.]", "", str(self.area)),
         }
 
@@ -238,6 +237,7 @@ class RuvFile(db.Model):
     mime = db.Column(db.VARCHAR(64))
     rid = db.Column(db.INTEGER)
     status = db.Column(db.INTEGER)
+    comment = db.relationship('Comment', backref='ruvfile', cascade='all, delete-orphan', uselist=False)
 
     def serialize(self):
         return {
@@ -272,7 +272,7 @@ class Address(db.Model):
 class Comment(db.Model):
     __tablename__ = "comment"
     id = db.Column(db.Integer, primary_key=True)
-    ruvfid = db.Column(db.Integer)
+    ruvfid = db.Column(db.Integer, db.ForeignKey('ruvfile.id'))
     entry_date = db.Column(db.TIMESTAMP)
     body = db.Column(db.String(512))
     status = db.Column(db.Integer)
@@ -492,51 +492,54 @@ def get_roof(id):
     raddresses = Address.query.filter_by(id=roof.address_id).all()
     sections = roof.sections.all()
 
+    s_dict = {}
     scount = 0
-    sJson = '['
+
     for section in sections:
         section_type = SectionTypes.query.filter_by(id=section.sectiontype.tid).one_or_none()
-        sJson += '{"type":"' + str(section_type.name) + '", "slope":"' + str(section.slope) + '","length":"' + str(
-            section.length) + '","width":"' + str(section.width) + '","twidth":"' + str(
-            section.twidth) + '","full":"' + str(section.full) + '",'
-        if section.full == 0 and section.emptytype is not None:
-            ename = section.emptytype.name
-            print (ename)
-            etype = section.emptytype
-            print (etype)
-            if etype is not None:
-                sJson += '"empty":"' + str(etype.area) + '", "etype":"' + etype.name + '"},'
-            else:
-                sJson = sJson[:-1] + '},'
-        else:
-            sJson = sJson[:-1] + '},'
+        s_row = {'section': section.serialize(), 'type': section_type.name}
 
+        if section.full == 0 and section.emptytype is not None:
+            print (section.emptytype.serialize())
+            s_row['empty'] = section.emptytype.serialize()
+
+        s_dict[scount] = s_row
         scount += 1
-    sJson = sJson[:-1] + '],'
-    
-    fstr = '['
+
+    f_dict = {}
+    fcount = 0
+
     for rfile in rfiles:
-        comment = Comment.query.filter_by(ruvfid=rfile.id, status=1).one_or_none()
-        fstr += '{"file": "' + rfile.filename + '"'
+        f_row = {'file': rfile.serialize()}
+        comment = Comment.query.filter_by(ruvfid=rfile.id).one_or_none()
         if comment is not None:
-            fstr += ',"comment":"' + comment.body + '"},'
-        else:
-            fstr += '},'
-    fstr = fstr[:-1] + ']'
-    cstr = '['
+            print 'We have a comment'
+            print comment
+            f_row['comment'] = comment.serialize()
+
+        f_dict[fcount] = f_row
+        fcount += 1
+
+    c_dict = {}
+    ccount = 0
+
     for rcustomer in rcustomers:
-        cstr += '{"customer": "' + str(rcustomer.id) + '"},'
-    cstr = fstr[:-1] + ']'
-    astr = '['
+        c_row = {'customer': rcustomer.serialize()}
+        c_dict[ccount] = c_row
+        ccount += 1
+
+    a_dict = {}
+    acount = 0
+
     for address in raddresses:
-        astr += '{"address": [{"address": "' + address.address + '", {"region": "' + address.region + '", "city": "' \
-                + address.city + '", "postal": "' + address.postal + '"]},'
-    astr = astr[:-1]
+        a_row = {'address': address.serialize()}
+        a_dict[acount] = a_row
+        acount += 1
+
     print roof.serialize()
-    print fstr
     if not roof:
         abort(400)
-    return jsonify({'Roof': roof.serialize(), 'Files': fstr.replace('\\"', '"'), 'Customers': cstr.replace('\\"', '"'), 'Address': astr.replace('\\"', '"'), 'Sections': sJson.replace('\\"', '"')})
+    return jsonify({'Roof': roof.serialize(), 'Files': f_dict, 'Customers': c_dict, 'Address': a_dict, 'Sections': s_dict})
 
 
 @app.route('/token', methods=['GET'])
