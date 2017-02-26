@@ -508,6 +508,7 @@ def get_roof(id):
 
     f_dict = {}
     fcount = 0
+    f_list = []
 
     for rfile in rfiles:
         f_row = {'file': rfile.serialize()}
@@ -516,7 +517,7 @@ def get_roof(id):
             print 'We have a comment'
             print comment
             f_row['comment'] = comment.serialize()
-
+        f_list.append(f_row)
         f_dict[fcount] = f_row
         fcount += 1
 
@@ -539,7 +540,7 @@ def get_roof(id):
     print roof.serialize()
     if not roof:
         abort(400)
-    return jsonify({'Roof': roof.serialize(), 'Files': f_dict, 'Customers': c_dict, 'Address': a_dict, 'Sections': s_dict})
+    return jsonify({'Roof': roof.serialize(), 'Files': f_list, 'Customers': c_dict, 'Address': a_dict, 'Sections': s_dict})
 
 
 @app.route('/token', methods=['GET'])
