@@ -490,6 +490,30 @@ def get_roof(id):
     rfiles = RuvFile.query.filter_by(rid=id, status=1).all()
     rcustomers = Customer.query.filter_by(id=roof.customer_id).all()
     raddresses = Address.query.filter_by(id=roof.address_id).all()
+    sections = roof.sections.all()
+
+    scount = 0
+    sJson = '['
+    for section in sections:
+        section_type = SectionTypes.query.filter_by(id=section.sectiontype.tid).one_or_none()
+        sJson += '{"type":"' + str(section_type.name) + '", "slope":"' + str(section.slope) + '","length":"' + str(
+            section.length) + '","width":"' + str(section.width) + '","twidth":"' + str(
+            section.twidth) + '","full":"' + str(section.full) + '",'
+        if section.full == 0 and section.emptytype is not None:
+            ename = section.emptytype.name
+            print (ename)
+            etype = section.emptytype
+            print (etype)
+            if etype is not None:
+                sJson += '"empty":"' + str(etype.area) + '", "etype":"' + etype.name + '"},'
+            else:
+                sJson = sJson[:-1] + '},'
+        else:
+            sJson = sJson[:-1] + '},'
+
+        scount += 1
+    sJson = sJson[:-1] + '],'
+    
     fstr = '['
     for rfile in rfiles:
         comment = Comment.query.filter_by(ruvfid=rfile.id, status=1).one_or_none()
@@ -512,7 +536,7 @@ def get_roof(id):
     print fstr
     if not roof:
         abort(400)
-    return jsonify({'Roof': roof.serialize(), 'Files': fstr, 'Customers': cstr, 'Address': astr})
+    return jsonify({'Roof': roof.serialize(), 'Files': fstr, 'Customers': cstr, 'Address': astr, 'Sections': sJson})
 
 
 @app.route('/token', methods=['GET'])
