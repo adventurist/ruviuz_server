@@ -492,16 +492,17 @@ def get_roof(id):
     raddresses = Address.query.filter_by(id=roof.address_id).all()
     sections = roof.sections.all()
 
+    scount = 0
     s_list = []
 
     for section in sections:
         section_type = SectionTypes.query.filter_by(id=section.sectiontype.tid).one_or_none()
-        s_row = {'section': section.serialize(), 'type': section_type.name}
+        s_row = {scount: section.serialize(), 'type': section_type.name}
 
         if section.full == 0 and section.emptytype is not None:
             print (section.emptytype.serialize())
             s_row['empty'] = section.emptytype.serialize()
-
+        scount += 1
         s_list.append(s_row)
 
     f_list = []
