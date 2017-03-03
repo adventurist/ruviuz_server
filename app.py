@@ -23,13 +23,13 @@ db = SQLAlchemy(app)
 auth = HTTPBasicAuth()
 
 
-class MJSONEncoder(JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, decimal.Decimal):
-            return str(obj)
-        return super(MJSONEncoder, self).default(obj)
-
-app.json_encoder = MJSONEncoder
+# class MJSONEncoder(JSONEncoder):
+#     def default(self, obj):
+#         if isinstance(obj, decimal.Decimal):
+#             return str(obj)
+#         return super(MJSONEncoder, self).default(obj)
+#
+# app.json_encoder = MJSONEncoder
 
 
 class User(db.Model):
