@@ -1,6 +1,6 @@
 from flask import Flask, abort, jsonify, url_for, render_template, g, request, send_from_directory
-from flask.json import JSONEncoder
-from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy, UnmappedClassError
+from sqlalchemy import exc
 from flask_httpauth import HTTPBasicAuth
 import decimal, re, os, json, datetime
 from passlib.apps import custom_app_context as pwd_context
@@ -805,10 +805,10 @@ def update_roof(id):
             db.session.commit()
             print files_not_found
             return jsonify({'Update': 'Success', 'Roof': roof.serialize(), 'FilesNotFound': files_not_found})
-        except Exception as e:
+        except exc.SQLAlchemyError as e:
             db.session.rollback()
             db.session.remove()
-            return jsonify({'Update': 'Fail'})
+            return jsonify({'Update': 'Fail', 'Error': e.message})
 
 
 @app.route('/files/<path:path>')
@@ -830,9 +830,9 @@ def get_estimate(rid):
             roof_update.price = estimated_price
             db.session.commit()
             print (roof_update.serialize())
-    except Exception:
-        print Exception.message
-        return jsonify({'Error': str(Exception.message)})
+    except SystemError:
+        print SystemError.message
+        return jsonify({'Error': str(SystemError.message)})
     return jsonify({'Result': 200, 'Area': total_area, 'RoofPrice': estimated_price})
 
 
@@ -843,7 +843,7 @@ def update_rooftype_prices():
         print ('Trying to update price')
         RoofType.update_price()
         return jsonify({'RoofType': 204, 'Price': 'Updated'})
-    except Exception:
+    except SystemError:
         return jsonify({'RoofType': 500, 'Price': 'Update failed'})
 
 
