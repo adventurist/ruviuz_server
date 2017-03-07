@@ -418,7 +418,7 @@ def add_roof():
         phone = request.json.get('phone')
         prefix = request.json.get('prefix')
 
-        if address is None or city is None or floornum or rstate is None or firstname is None or material is None:
+        if address is None or city is None or floornum is None or rstate is None or firstname is None or material is None:
             print ('Something not set')
             abort(400)
         # if Roof.query.filter_by(address=address).first() is not None:
