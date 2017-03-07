@@ -71,6 +71,7 @@ class Roof(db.Model):
     floors = db.Column(db.Integer)
     address_id = db.Column(db.Integer)
     customer_id = db.Column(db.Integer)
+    rstate = db.Column(db.Integer)
     sections = db.relationship('Section', backref='roof', cascade='all, delete-orphan', lazy='dynamic')
     rooftype = db.relationship('Rtype', backref='roof', cascade='all, delete-orphan', uselist=False)
 
@@ -81,6 +82,7 @@ class Roof(db.Model):
             'floors': re.sub("[^0-9^.]", "", str(self.floors)),
             'address_id': self.address_id,
             'customer_id': self.customer_id,
+            'rstate': self.rstate,
         }
 
 
@@ -408,14 +410,15 @@ def add_roof():
         region = request.json.get('region')
         postal = request.json.get('postal')
         material = request.json.get('material')
-        price = request.json.get('price')
+        floornum = request.json.get('numFloors')
+        rstate = request.json.get('cleanupFactor')
         firstname = request.json.get('firstName')
         lastname = request.json.get('lastName')
         email = request.json.get('email')
         phone = request.json.get('phone')
         prefix = request.json.get('prefix')
 
-        if address is None or city is None or price is None or firstname is None or material is None:
+        if address is None or city is None or floornum or rstate is None or firstname is None or material is None:
             print ('Something not set')
             abort(400)
         # if Roof.query.filter_by(address=address).first() is not None:
@@ -423,8 +426,8 @@ def add_roof():
         #     print ('Found a roof')
         #     if roof is not None:
             print ('Found a roof at the following address: ')
-                # print str(address.serialize())
-                # return jsonify({'Address': address.serialize()}), 200
+        # print str(address.serialize())
+        # return jsonify({'Address': address.serialize()}), 200
         print ('Make new roof')
 
         newaddress = None
@@ -459,7 +462,7 @@ def add_roof():
             rmat_id = rmaterial.id
 
         if newaddress is not None and newcustomer is not None:
-            roof = Roof(price=price, address_id=newaddress.id,
+            roof = Roof(floors=floornum, rstate=rstate, address_id=newaddress.id,
                         customer_id=newcustomer.id)
             db.session.add(roof)
             db.session.commit()
