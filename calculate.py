@@ -94,6 +94,7 @@ class Calculator:
                 i += 1
 
         floors = roof.floors if roof.floors is not None else 1
+        print floors
         floors_factor = 0 if floors == 1 else 0.05
         clean_factor = 1.0625
         empty_factor = 0.0375 * (1 + enum)
