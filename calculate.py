@@ -103,7 +103,7 @@ class Calculator:
         print 'Mat:type.price' + str(mat_type.price) + '\nEnum:' + str(enum) + '\nCleanfactor:' + str(clean_factor) + \
               '\nPitch:' + str(pitch) + '\nTotalArea:' + str(total_area) + '\nfloors_factor:' + str(floors_factor)
         roof_price = mat_type.price * total_area * decimal.Decimal(empty_factor) * decimal.Decimal(clean_factor) * \
-                     (1 + (floors + floors_factor)) * decimal.Decimal(pitch)
+                     (1 + decimal.Decimal(floors + floors_factor)) * decimal.Decimal(pitch)
         print 'Mat:type' + str(mat_type) + '\nEnum:' + str(enum) + '\nCleanfactor:' + str(clean_factor) + '\nPitch:' \
               + str(pitch) + '\nTotalArea:' + str(total_area) + '\nfloors_factor:' + str(floors_factor)
         print str(mat_type.price) + ' * ' + str(total_area) + ' * ' + str(empty_factor) + ' * ' + \
