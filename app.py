@@ -1,12 +1,17 @@
 from flask import Flask, abort, jsonify, url_for, render_template, g, request, send_from_directory
-from flask_sqlalchemy import SQLAlchemy, UnmappedClassError
-from sqlalchemy import exc
+from flask_sqlalchemy import SQLAlchemy
 from flask_httpauth import HTTPBasicAuth
-import decimal, re, os, json, datetime
+from sqlalchemy import exc
+from json import JSONEncoder
 from passlib.apps import custom_app_context as pwd_context
 from itsdangerous import (TimedJSONWebSignatureSerializer as Serializer, BadSignature, SignatureExpired)
 from werkzeug.utils import secure_filename
 from calculate import Calculator
+
+import re
+import os
+import datetime
+import decimal
 
 UPLOAD_FOLDER = './ruv_uploads/'
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
@@ -23,13 +28,13 @@ db = SQLAlchemy(app)
 auth = HTTPBasicAuth()
 
 
-# class MJSONEncoder(JSONEncoder):
-#     def default(self, obj):
-#         if isinstance(obj, decimal.Decimal):
-#             return str(obj)
-#         return super(MJSONEncoder, self).default(obj)
-#
-# app.json_encoder = MJSONEncoder
+class MJSONEncoder(JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, decimal.Decimal):
+            return str(obj)
+        return super(MJSONEncoder, self).default(obj)
+
+app.json_encoder = MJSONEncoder
 
 
 class User(db.Model):
@@ -836,6 +841,7 @@ def get_estimate(rid):
     except SystemError:
         print SystemError.message
         return jsonify({'Error': str(SystemError.message)})
+    print (estimated_price)
     return jsonify({'Result': 200, 'Area': total_area, 'RoofPrice': estimated_price})
 
 
