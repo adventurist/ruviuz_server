@@ -704,7 +704,7 @@ def get_roofs():
         i = 0
         for roof in roofs:
             print (roof.serialize)
-            mJson += '{"roof":{"id":"' + str(roof.id) + '","price":"' + str(roof.price) + '"'
+            mJson += '{"roof":{"id":"' + str(roof.id) + '","price":"' + str(roof.price) + '","floors":"' + str(roof.floors) + '","rstate":"' + str(roof.rstate) + '"'
             cQuery = Customer.query.filter_by(id=roof.customer_id)
             fQuery = RuvFile.query.filter_by(rid=roof.id, status=1)
             sQuery = Section.query.filter_by(rid=roof.id)
