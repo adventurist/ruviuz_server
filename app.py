@@ -290,11 +290,10 @@ class Comment(db.Model):
     status = db.Column(db.Integer)
 
     def serialize(self):
-        print(self.entry_date)
         return {
             'id': self.id,
             'ruvfid': self.ruvfid,
-            'entry_date': datetime.datetime.fromtimestamp(float(self.entry_date)),
+            'entry_date': self.entry_date.isoformat(),
             'body': self.body.encode("utf-8"),
             'status': self.status,
         }
