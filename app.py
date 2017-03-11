@@ -30,7 +30,7 @@ auth = HTTPBasicAuth()
 
 class MJSONEncoder(JSONEncoder):
     def default(self, obj):
-        if isinstance(obj, decimal.Decimal):
+        if isinstance(obj, decimal.Decimal, datetime.datetime):
             return str(obj)
         return super(MJSONEncoder, self).default(obj)
 
@@ -538,7 +538,7 @@ def get_roof(id):
     print roof.serialize()
     if not roof:
         abort(400)
-    return jsonify({'Roof': roof.serialize(), 'Files': f_list, 'Customers': c_list, 'Address': a_list, 'Sections': s_list})
+    return jsonify({'Roof': roof.serialize(), 'Files': f_list, 'Customers': c_list, 'Address': str(a_list), 'Sections': s_list})
 
 
 @app.route('/token', methods=['GET'])
