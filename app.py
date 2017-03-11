@@ -293,7 +293,7 @@ class Comment(db.Model):
         return {
             'id': self.id,
             'ruvfid': self.ruvfid,
-            'entry_date': self.entry_date,
+            'entry_date': datetime.datetime.fromtimestamp(self.entry_date).strftime('%Y-%m-%d %H:%M:%S'),
             'body': self.body.encode("utf-8"),
             'status': self.status,
         }
@@ -543,7 +543,7 @@ def get_roof(id):
     print roof.serialize()
     if not roof:
         abort(400)
-    return jsonify({'Roof': roof.serialize(), 'Files': str(f_list), 'Customers': c_list, 'Address': str(a_list), 'Sections': s_list})
+    return jsonify({'Roof': roof.serialize(), 'Files': f_list, 'Customers': c_list, 'Address': str(a_list), 'Sections': s_list})
 
 
 @app.route('/token', methods=['GET'])
