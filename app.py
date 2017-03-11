@@ -30,7 +30,12 @@ auth = HTTPBasicAuth()
 
 class MJSONEncoder(JSONEncoder):
     def default(self, obj):
-        if isinstance(obj, decimal.Decimal, datetime.datetime):
+        if isinstance(obj, decimal.Decimal):
+            return str(obj)
+        return super(MJSONEncoder, self).default(obj)
+
+    def datetime(self, obj):
+        if isinstance(obj, datetime.datetime):
             return str(obj)
         return super(MJSONEncoder, self).default(obj)
 
