@@ -294,7 +294,7 @@ class Comment(db.Model):
         return {
             'id': self.id,
             'ruvfid': self.ruvfid,
-            'entry_date': datetime.datetime.fromtimestamp(self.entry_date),
+            'entry_date': datetime.datetime.fromtimestamp(float(self.entry_date)),
             'body': self.body.encode("utf-8"),
             'status': self.status,
         }
