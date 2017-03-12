@@ -293,7 +293,7 @@ class Comment(db.Model):
         return {
             'id': self.id,
             'ruvfid': self.ruvfid,
-            'entry_date': self.entry_date.isoformat(),
+            'entry_date': self.entry_date.strftime("%b %d %Y %H:%M:%S"),
             'body': self.body.encode("utf-8"),
             'status': self.status,
         }
