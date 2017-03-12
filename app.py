@@ -729,7 +729,7 @@ def get_roofs():
                 for section in sResult:
                     print section.serialize
                     section_type = SectionTypes.query.filter_by(id=section.sectiontype.tid).one_or_none()
-                    mJson += '{"type":"' + str(section_type.name)+ '", "slope":"'+ str(section.slope) + '","length":"' + str(section.length) + '","width":"' + str(section.width) + '","twidth":"' + str(section.twidth) + '","full":"' + str(section.full) + '",'
+                    mJson += '{"type":"' + str(section_type.name) + '", "slope":"'+ str(section.slope) + '","length":"' + str(section.length) + '","width":"' + str(section.width) + '","twidth":"' + str(section.twidth) + '","full":"' + str(section.full) + '",'
                     if section.full == 0 and section.emptytype is not None:
                         ename = section.emptytype.name
                         print (ename)
@@ -755,7 +755,7 @@ def get_roofs():
                     print (comment)
                     mJson += '{"' + str(fcount) + '":"' + str(result.filename) + '"'
                     if comment is not None:
-                        mJson += ',"comment":"' + comment.body + '"},'
+                        mJson += ',"comment":"' + comment.body + '", "time":"+"' + comment.entry_date + '"},'
                     else:
                         mJson += '},'
                     fcount += 1
@@ -864,8 +864,7 @@ def update_rooftype_prices():
 
 if __name__ == '__main__':
 
-    RoofType.update_price()
-
     app.debug = True
     # app.debug = False
     app.run()
+
