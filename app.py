@@ -727,6 +727,7 @@ def get_roofs():
                 mJson = mJson[:-1]
                 mJson += ',"sections":['
                 for section in sResult:
+                    print section
                     section_type = SectionTypes.query.filter_by(id=section.sectiontype.tid).one_or_none()
                     mJson += '{"type":"' + str(section_type.name)+ '", "slope":"'+ str(section.slope) + '","length":"' + str(section.length) + '","width":"' + str(section.width) + '","twidth":"' + str(section.twidth) + '","full":"' + str(section.full) + '",'
                     if section.full == 0 and section.emptytype is not None:
