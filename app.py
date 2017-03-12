@@ -863,6 +863,10 @@ def update_rooftype_prices():
 
 
 if __name__ == '__main__':
+
+    if db.session.query(RoofType).count() < 1:
+        RoofType.update_price()
+
     app.debug = True
     # app.debug = False
     app.run()
