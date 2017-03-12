@@ -755,7 +755,8 @@ def get_roofs():
                     print (comment)
                     mJson += '{"' + str(fcount) + '":"' + str(result.filename) + '"'
                     if comment is not None:
-                        mJson += ',"comment":"' + comment.body + '", "time":"+"' + str(comment.entry_date) + '"},'
+                        mJson += ',"comment":"' + comment.body + '"},'
+                        # + '", "time":"+"' + str(comment.entry_date)
                     else:
                         mJson += '},'
                     fcount += 1
