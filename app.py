@@ -864,8 +864,7 @@ def update_rooftype_prices():
 
 if __name__ == '__main__':
 
-    if RoofType.query.all().count() < 1:
-        RoofType.update_price()
+    RoofType.update_price()
 
     app.debug = True
     # app.debug = False
