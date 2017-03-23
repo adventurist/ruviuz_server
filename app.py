@@ -709,7 +709,7 @@ def get_roofs():
         i = 0
         for roof in roofs:
             print (roof.serialize)
-            roof.price = roof.price if roof.rice is not None else 1
+            roof.price = roof.price if roof.price is not None else 1
             mJson += '{"roof":{"id":"' + str(roof.id) + '","price":"' + str(roof.price) + '","floors":"' + str(roof.floors) + '","rstate":"' + str(roof.rstate) + '"'
             cQuery = Customer.query.filter_by(id=roof.customer_id)
             fQuery = RuvFile.query.filter_by(rid=roof.id, status=1)
