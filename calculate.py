@@ -18,6 +18,10 @@ class Calculator:
         r_type = Rtype.query.filter_by(rid=self.rid).one_or_none()
         mat_type = RoofType.query.filter_by(id=r_type.tid).one_or_none()
 
+        if mat_type.price is None:
+            RoofType.update_price()
+            mat_type = RoofType.query.filter_by(id=r_type.tid).one_or_none()
+
         pitch = None
         enum = 0
         total_area = 0
