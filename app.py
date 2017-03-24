@@ -411,10 +411,11 @@ def login():
 @app.route('/roof/add', methods=['POST'])
 @auth.login_required
 def add_roof():
+    print request.json
     print ('Requesting roof addition')
     if request.headers['Content-Type'] == 'application/json':
         print ('155')
-        print request.json
+
         address = request.json.get('address')
         city = request.json.get('city')
         region = request.json.get('region')
