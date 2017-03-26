@@ -611,11 +611,19 @@ def delete_roof(rid):
     roof = Roof.query.get(rid)
     sections = Section.query.filter_by(rid=rid).all()
     ruvfiles = RuvFile.query.filter_by(rid=rid).all()
-    db.session.delete(ruvfiles)
-    db.session.delete(sections)
+
     try:
         db.session.delete(roof)
+
+        for ruvfile in ruvfiles:
+            db.session.delete(ruvfile)
+
+        for section in sections:
+            db.session.delete(section)
+
+        db.session.commit()
         db.session.flush()
+
     except exc.SQLAlchemyError as e:
         logging.warning("Unable to delete roof and its children")
         db.session.rollback()
