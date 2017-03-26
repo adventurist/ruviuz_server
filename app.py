@@ -12,6 +12,7 @@ import re
 import os
 import datetime
 import decimal
+import logging
 
 UPLOAD_FOLDER = './ruv_uploads/'
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
@@ -497,11 +498,11 @@ def get_user(id):
     return jsonify({'email': user.email, 'password': user.password_hash})
 
 
-@app.route('/roofs/<int:id>')
+@app.route('/roofs/<int:rid>')
 @auth.login_required
-def get_roof(id):
-    roof = Roof.query.get(id)
-    rfiles = RuvFile.query.filter_by(rid=id, status=1).all()
+def get_roof(rid):
+    roof = Roof.query.get(rid)
+    rfiles = RuvFile.query.filter_by(rid=rid, status=1).all()
     rcustomers = Customer.query.filter_by(id=roof.customer_id).all()
     raddresses = Address.query.filter_by(id=roof.address_id).all()
     sections = roof.sections.all()
@@ -601,6 +602,26 @@ def send_file():
             db.session.commit()
             print ('Created file==> ' + str(ruvfile.serialize()))
             return jsonify({'File': ruvfile.serialize()}), 201
+
+
+@app.route('/roofs/delete/<int:rid>')
+@auth.login_required
+def delete_roof(rid):
+
+    roof = Roof.query.get(rid)
+    sections = Section.query.filter_by(rid=rid).all()
+    ruvfiles = RuvFile.query.filter_by(rid=rid).all()
+    db.session.delete(ruvfiles)
+    db.session.delete(sections)
+    try:
+        db.session.delete(roof)
+        db.session.flush()
+    except exc.SQLAlchemyError as e:
+        logging.warning("Unable to delete roof and its children")
+        db.session.rollback()
+        db.session.flush()
+        print (e.message)
+        return e.message
 
 
 @app.route('/section/add', methods=['GET', 'POST'])
