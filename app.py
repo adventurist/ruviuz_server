@@ -486,7 +486,7 @@ def add_roof():
 
             print ('Created roof==> ' + str(roof.serialize()))
             return jsonify({'Roof': roof.serialize()}), 201, {
-                'Location': url_for('get_roof', id=roof.id, _external=True)}
+                'Location': url_for('get_roof', rid=roof.id, _external=True)}
 
 
 @app.route('/users/<int:id>')
