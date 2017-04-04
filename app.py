@@ -624,6 +624,8 @@ def delete_roof(rid):
         db.session.commit()
         db.session.flush()
 
+        return jsonify({'RuvDelete', 'Success', 'Deleted', str(rid)}), 204
+
     except exc.SQLAlchemyError as e:
         logging.warning("Unable to delete roof and its children")
         db.session.rollback()
