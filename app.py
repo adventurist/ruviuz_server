@@ -688,6 +688,21 @@ def create_section():
             return jsonify({'Section': new_section.serialize()}), 201
 
 
+@app.route('/section/delete/<int:sid>')
+@auth.login_required
+def delete_section(sid):
+    section = Section.get(sid)
+    try:
+        db.session.delete(section)
+        db.session.commit()
+        db.session.flush()
+    except exc.SQLAlchemyError as e:
+        print (e.message)
+        return e.message
+    
+
+
+
 @app.route('/comment/add', methods=['GET', 'POST'])
 @auth.login_required
 def create_comment():
