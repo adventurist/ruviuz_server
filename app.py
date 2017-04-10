@@ -506,7 +506,7 @@ def get_roof(rid):
     rfiles = RuvFile.query.filter_by(rid=rid, status=1).all()
     rcustomers = Customer.query.filter_by(id=roof.customer_id).all()
     raddresses = Address.query.filter_by(id=roof.address_id).all()
-    rooftype = RoofType.query.get(roof.rooftype.id)
+    rooftype = RoofType.query.get(roof.rooftype.tid)
     sections = roof.sections.all()
 
     s_list = []
