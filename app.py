@@ -506,11 +506,13 @@ def get_roof(rid):
     rcustomers = Customer.query.filter_by(id=roof.customer_id).all()
     raddresses = Address.query.filter_by(id=roof.address_id).all()
     rtype = roof.rooftype
-    rooftype = RoofType.query.get(rtype.id)
+    rooftype = RoofType.query.filter_by(id=rtype.id)
+    rooftypeII = RoofType.query.get(rtype.id)
     sections = roof.sections.all()
 
     print (rtype)
     print (rooftype)
+    print (rooftypeII)
 
     s_list = []
 
