@@ -321,6 +321,7 @@ class Customer(db.Model):
             'address_id': self.address_id,
             'phone': self.phone.encode("utf-8"),
             'email': self.email.encode("utf-8"),
+            'prefix': self.prefix.encode("utf-8"),
             'referred_by': self.referred_by,
         }
 
