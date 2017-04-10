@@ -506,7 +506,11 @@ def get_roof(rid):
     rcustomers = Customer.query.filter_by(id=roof.customer_id).all()
     raddresses = Address.query.filter_by(id=roof.address_id).all()
     rtype = roof.rooftype
+    rooftype = RoofType.query.get(rtype.id)
     sections = roof.sections.all()
+
+    print (rtype)
+    print (rooftype)
 
     s_list = []
 
@@ -546,7 +550,7 @@ def get_roof(rid):
     print roof.serialize()
     if not roof:
         abort(400)
-    return jsonify({'Roof': roof.serialize(), 'Files': f_list, 'Customers': c_list, 'Address': str(a_list), 'Sections': s_list, 'RoofType': rtype.serialize})
+    return jsonify({'Roof': roof.serialize(), 'Files': f_list, 'Customers': c_list, 'Address': str(a_list), 'Sections': s_list, 'RoofType': rooftype.serialize})
 
 
 @app.route('/token', methods=['GET'])
