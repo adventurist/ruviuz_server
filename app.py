@@ -703,8 +703,6 @@ def delete_section(sid):
         return e.message
 
 
-
-
 @app.route('/comment/add', methods=['GET', 'POST'])
 @auth.login_required
 def create_comment():
@@ -868,6 +866,7 @@ def update_roof(id):
         roof.width = width
         roof.slope = slope
         try:
+            db.session.update
             db.session.commit()
             print files_not_found
             return jsonify({'Update': 'Success', 'Roof': roof.serialize(), 'FilesNotFound': files_not_found})
@@ -875,6 +874,98 @@ def update_roof(id):
             db.session.rollback()
             db.session.remove()
             return jsonify({'Update': 'Fail', 'Error': e.message})
+
+
+@app.route('section/update/<int:sid>', method=['POST'])
+@auth.login_required
+def update_section(sid):
+    if request.method == 'POST':
+        if request.headers['Content-Type'] == 'application/json':
+            print (request.json)
+            sid2 = request.json.get('sid')
+            if sid2 == sid:
+
+                section_type = request.json.get('type')
+                length = request.json.get('length')
+                width = request.json.get('width')
+                twidth = request.json.get('topwidth')
+                slope = request.json.get('slope')
+                missing = request.json.get('missing')
+                ruvfid = request.json.get('rid')
+                full = True if request.json.get('full') == 1 else False
+                if length is None or width is None or twidth is None or slope is None or missing is None or ruvfid is None or full is None:
+                    print 'Insufficient data to create new section'
+                    return 'Insufficient data to create new section'
+                section = Section.query.filter_by(id=sid).first()
+                if section is not None:
+                    print ('Updating Section with SID = ' + sid)
+                    section.rid = ruvfid
+                    section.length = length
+                    section.width = width
+                    section.twidth = twidth
+                    section.slope = slope
+                    section.empty = missing
+                    section.full = full
+                    try:
+                        db.session.commit()
+                    except exc.SQLAlchemyError as e:
+                        print (e.message)
+                        return e.message
+                    if not full:
+                        print ('Updating empty type')
+                        etype = request.json.get('etype')
+                        if etype is not None:
+                            emptytype = EmptyType(sid=sid).first()
+                            if emptytype is not None:
+                                emptytype.name = etype
+                                emptytype.area = missing
+                                try:
+                                    db.session.add(emptytype)
+                                    db.session.commit()
+                                except exc.SQLAlchemyError as e:
+                                    print (e.message)
+                                    return e.message
+                            else:
+                                print ('EmptyType didn\'t previously exist: creating new.')
+                                return 'EmptyType didn\'t previously exist: creating new.'
+                                emptytype = EmptyType(sid=sid, name=etype, area=missing)
+                        try:
+                            db.session.add(emptytype)
+                            db.session.commit()
+                        except exc.SQLAlchemyError as e:
+                            print (e.message)
+                            return e.message
+                    stype = SectionTypes.query.filter_by(name=section_type).one_or_none()
+                    if stype is None:
+                        sec_type = SectionTypes(name=section_type)
+                        try:
+                            db.session.add(sec_type)
+                            db.session.commit()
+                            stype.tid = sec_type.id
+                        except exc.SQLAlchemyError as e:
+                            print (e.message)
+                            return e.message
+                    section_this_type = SectionType.query.filter_by(sid=sid).one_or_none()
+                    if section_this_type is None:
+                        section_this_type = SectionType(sid=sid, tid=stype.tid)
+                        try:
+                            db.session.add(section_this_type)
+                            db.session.commit()
+                            stype.tid = sec_type.id
+                        except exc.SQLAlchemyError as e:
+                            print (e.message)
+                            return e.message
+                    else:
+                        if section_this_type.tid != stype.tid:
+                            section_this_type.tid = stype.tid
+                            try:
+                                db.session.commit()
+                            except exc.SQLAlchemyError as e:
+                                print (e.message)
+                                return e.message
+
+            print ('Updated section ==> ' + str(section.serialize()))
+            return jsonify({'Updated section': section.serialize()}), 204
 
 
 @app.route('/files/<path:path>')
@@ -919,4 +1010,3 @@ if __name__ == '__main__':
     app.debug = True
     # app.debug = False
     app.run()
-
