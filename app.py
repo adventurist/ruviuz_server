@@ -875,6 +875,7 @@ def update_roof(id):
             db.session.remove()
             return jsonify({'Update': 'Fail', 'Error': e.message})
 
+
 @app.route('section/update/<int:sid>', methods=['POST'])
 @auth.login_required
 def update_section(sid):
@@ -926,14 +927,13 @@ def update_section(sid):
                                     return e.message
                             else:
                                 print ('EmptyType didn\'t previously exist: creating new.')
-                                return 'EmptyType didn\'t previously exist: creating new.'
                                 emptytype = EmptyType(sid=sid, name=etype, area=missing)
-                        try:
-                            db.session.add(emptytype)
-                            db.session.commit()
-                        except exc.SQLAlchemyError as e:
-                            print (e.message)
-                            return e.message
+                                try:
+                                    db.session.add(emptytype)
+                                    db.session.commit()
+                                except exc.SQLAlchemyError as e:
+                                    print (e.message)
+                                    return e.message
                     stype = SectionTypes.query.filter_by(name=section_type).one_or_none()
                     if stype is None:
                         sec_type = SectionTypes(name=section_type)
