@@ -876,7 +876,7 @@ def update_roof(id):
             return jsonify({'Update': 'Fail', 'Error': e.message})
 
 
-@app.route('section/update/<int:sid>', methods=['POST'])
+@app.route('/section/update/<int:sid>', methods=['POST'])
 @auth.login_required
 def update_section(sid):
 
