@@ -241,8 +241,8 @@ class EmptyType(db.Model):
             'sid': self.sid,
             'name': self.name.encode("utf-8"),
             'area': re.sub("[^0-9^.]", "", str(self.area)),
-            'length': re.sub("[^0-9^.]", "", str(self.elength)),
-            'width': re.sub("[^0-9^.]", "", str(self.ewidth)),
+            'length': re.sub("[^0-9^.]", "", str(self.length)),
+            'width': re.sub("[^0-9^.]", "", str(self.width)),
         }
 
 
