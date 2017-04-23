@@ -232,6 +232,8 @@ class EmptyType(db.Model):
     sid = db.Column(db.Integer, db.ForeignKey('section.id'))
     name = db.Column(db.VARCHAR(64))
     area = db.Column(db.Float)
+    length = db.Column(db.Float)
+    width = db.Column(db.Float)
 
     def serialize(self):
         return {
@@ -239,6 +241,8 @@ class EmptyType(db.Model):
             'sid': self.sid,
             'name': self.name.encode("utf-8"),
             'area': re.sub("[^0-9^.]", "", str(self.area)),
+            'length': re.sub("[^0-9^.]", "", str(self.elength)),
+            'width': re.sub("[^0-9^.]", "", str(self.ewidth)),
         }
 
 
@@ -668,9 +672,11 @@ def create_section():
             if not full:
                 print ('Saving Empty Type')
                 etype = request.json.get('etype')
+                elength = request.json.get('elength')
+                ewidth = request.json.get('ewidth')
                 print (etype)
                 if etype is not None:
-                    emptytype = EmptyType(sid=new_section.id, name=etype, area=missing)
+                    emptytype = EmptyType(sid=new_section.id, name=etype, area=missing, length=elength, width=ewidth)
                     print str(emptytype.serialize())
                     db.session.add(emptytype)
                     db.session.commit()
@@ -785,7 +791,7 @@ def get_roofs():
                         etype = section.emptytype
                         print (etype)
                         if etype is not None:
-                            mJson += '"empty":"' + str(etype.area) + '", "etype":"' + etype.name + '"},'
+                            mJson += '"empty":"' + str(etype.area) + '","elength":"' + etype.length + '","ewidth":"' + etype.width + '","etype":"' + etype.name + '"},'
                         else:
                             mJson = mJson[:-1] + '},'
                     else:
@@ -900,8 +906,8 @@ def update_section(sid):
 
                 if length is None or width is None or twidth is None or slope is None or missing is None or ruvfid is None or full is None:
 
-                    print 'Insufficient data to create new section'
-                    return 'Insufficient data to create new section'
+                    print 'Insufficient data to update new section'
+                    return 'Insufficient data to update new section'
 
                 section = Section.query.filter_by(id=sid).first()
 
