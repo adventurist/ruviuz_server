@@ -1031,6 +1031,17 @@ def update_rooftype_prices():
         return jsonify({'RoofType': 500, 'Price': 'Update failed'})
 
 
+@app.route('/SectionTypes/price/update', methods=['GET', 'POST'])
+@auth.login_required
+def update_sectiontype_prices():
+    try:
+        print ('Attempting to declare default sectiontypes / prices')
+        SectionTypes.update_price()
+        return jsonify({'SectionType': 204, 'Price': 'Updated'})
+    except SystemError:
+        return jsonify({'SectionTypes': 500, 'Price': 'Update failed'})
+
+
 if __name__ == '__main__':
 
     app.debug = True
