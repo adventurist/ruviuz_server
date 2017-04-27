@@ -652,12 +652,22 @@ def create_section():
             width = request.json.get('width')
             twidth = request.json.get('topwidth')
             slope = request.json.get('slope')
-            missing = request.json.get('missing')
+            missing = request.json.get('empty')
             ruvfid = request.json.get('rid')
             full = True if request.json.get('full') == 1 else False
+
             print (request.json.get('full'))
 
-            if length is None or width is None or twidth is None or slope is None or missing is None or ruvfid is None or full is None:
+            print(str(section_type))
+            print(str(length))
+            print(str(width))
+            print(str(twidth))
+            print(str(slope))
+            print(str(missing))
+            print(str(ruvfid))
+            print(str(full))
+
+            if section_type is None or length is None or width is None or twidth is None or slope is None or missing is None or ruvfid is None or full is None:
                 print 'Insufficient data to create new section'
                 return 'Insufficient data to create new section'
             section = Section.query.filter_by(rid=ruvfid, length=length, width=width, twidth=twidth, empty=missing, full=full,
