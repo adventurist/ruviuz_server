@@ -48,6 +48,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True)
     password_hash = db.Column(db.String(128))
+    status = db.Column(db.Boolean)
 
     def hash_password(self, password):
         self.password_hash = pwd_context.encrypt(password)
@@ -310,7 +311,7 @@ class Customer(db.Model):
     prefix = db.Column(db.VARCHAR(4))
     first = db.Column(db.VARCHAR(96))
     last = db.Column(db.VARCHAR(96))
-    married = db.Column(db.Boolean(96))
+    married = db.Column(db.Boolean)
     address_id = db.Column(db.Integer)
     phone = db.Column(db.VARCHAR(20))
     email = db.Column(db.VARCHAR(128))
