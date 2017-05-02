@@ -331,6 +331,24 @@ class Customer(db.Model):
         }
 
 
+class Location(db.Model):
+    __tablename__ = "location"
+    id = db.Column(db.Integer, primary_key=True)
+    country = db.Column(db.String(40))
+    region = db.Column(db.String(40))
+    city = db.Column(db.String(75))
+    ruvlocations = db.relationship('RuvLocations', backref='location', cascade='all, delete-orphan', uselist=False)
+    db.UniqueConstraint('country', 'region', 'city')
+    # TODO add Trigger or Function directly in Postgres to handle update query on RuvLocations table
+
+
+class RuvLocations(db.Model):
+    __tablename__ = "ruv_locations"
+    id = db.Column(db.Integer, primary_key=True)
+    location_id = db.Column(db.Integer, db.ForeignKey('location.id'))
+    hits = db.Column(db.Integer)
+
+
 @app.teardown_appcontext
 def shutdown_session(exception=None):
     db.session.remove()
@@ -435,21 +453,22 @@ def add_roof():
         email = request.json.get('email')
         phone = request.json.get('phone')
         prefix = request.json.get('prefix')
+        married = request.json.get('married')
 
         if address is None or city is None or floornum is None or rstate is None or firstname is None or material is None:
             print ('Something not set')
             abort(400)
-        # if Roof.query.filter_by(address=address).first() is not None:
-        #     roof = Address(address=address)
-        #     print ('Found a roof')
-        #     if roof is not None:
-            print ('Found a roof at the following address: ')
-        # print str(address.serialize())
-        # return jsonify({'Address': address.serialize()}), 200
+
+        # TODO Determine whether or not we should evaluate logic based on the presence of a Roof quote for a
+        # previously used location
+        # In the current state of development, the value of married can be passed as null without any problems.
+        # It is yet to be determined whether or not this will become a mandatory requirement in the years to come,
+        # as the Marxists and Post-Modernists attempt to intrude into every facet of societal affairs.
+
         print ('Make new roof')
 
         newaddress = None
-        newcustomer = Customer(prefix=prefix, first=firstname, last=lastname, email=email, phone=phone)
+        newcustomer = Customer(prefix=prefix, first=firstname, last=lastname, email=email, phone=phone, married=married)
 
         try:
             db.session.add(newcustomer)
@@ -460,6 +479,9 @@ def add_roof():
 
         if newcustomer is not None:
             newaddress = Address(city=city, region=region, postal=postal, country='Canada', address=address)
+
+            ruvlocation = Location(region=region, city=city, country='Nebuchadnezzarland')
+
 
             try:
                 db.session.add(newaddress)
