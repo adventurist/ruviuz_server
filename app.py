@@ -453,7 +453,7 @@ def add_roof():
         email = request.json.get('email')
         phone = request.json.get('phone')
         prefix = request.json.get('prefix')
-        married = request.json.get('married')
+        married = True if request.json.get('married') == 1 else False
 
         if address is None or city is None or floornum is None or rstate is None or firstname is None or material is None:
             print ('Something not set')
