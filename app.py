@@ -376,9 +376,28 @@ def index():
     return render_template('index.html')
 
 
+@app.route('/register', method=['POST'])
+def register():
+    if request.headers['Content-Type'] == 'application/json':
+        email = request.json.get('email')
+        password = request.json.get('password')
+
+        if email is None or password is None:
+            return jsonify({'Error': 'Missing data', 'ResponseCode': 404})
+        else:
+            user = User(email=email, status=0)
+            User.hash_password(user, password)
+            try:
+                db.session.add(user)
+                db.session.commit()
+                return jsonify({'Success': 'Application accepted. Your request will be verified by an administrator', 'ResponseCode': 200})
+            except exc.SQLAlchemyError:
+                return jsonify({'Failure': 'Application was not submitted', 'ResponseCode': 400})
+
+
 @app.route('/login', methods=['POST'])
 def login():
-    if request.headers['content-Type'] == 'application/x-www-form-urlencoded':
+    if request.headers['Content-Type'] == 'application/x-www-form-urlencoded':
         email = request.form['email']
         password = request.form['password']
         if email is None or password is None:
@@ -401,7 +420,6 @@ def login():
         db.session.commit()
         return render_template('success.html')
     elif request.headers['Content-Type'] == 'application/json':
-        print ('122')
         print(request.json)
         email = request.json.get('email')
         password = request.json.get('password')
@@ -410,7 +428,6 @@ def login():
         if User.query.filter_by(email=email).first() is not None:
             verify = verify_password(email, password)
             user = User(email=email)
-            print ('130')
             print verify
             if verify:
                 print (g.user.id)
